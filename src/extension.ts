@@ -10,6 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log('extension "rails-i18n" activated');
 
+    i18nResolver.loadDefaultLocale();
     i18nResolver.loadYamlFiles();
 
     const HAML = { language: 'haml', scheme: 'file' };

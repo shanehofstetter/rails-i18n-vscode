@@ -11,9 +11,10 @@ export class I18nResolver {
     private readonly yamlPattern = 'config/locales/**/*.yml';
 
     /**
-     * generates map of locales
+     * load yaml locale files and generate single map out of them
+     * register file watcher and reload changed files into map
      */
-    public loadYamlFiles() {
+    public loadYamlFiles(): void {
         if (this.locales) {
             return;
         }
@@ -26,14 +27,19 @@ export class I18nResolver {
             });
         });
 
-        this.getDefaultLocale().then(locale => { this.defaultLocale = locale; });
-
         this.fileSystemWatcher = workspace.createFileSystemWatcher(new vscode.RelativePattern(workspace.rootPath, this.yamlPattern));
         this.fileSystemWatcher.onDidChange((e: vscode.Uri) => {
             workspace.openTextDocument(e.fsPath).then((document: vscode.TextDocument) => {
                 this.locales = merge.recursive(false, this.locales, safeLoad(document.getText()));
             });
         });
+    }
+
+    /**
+     * load the default locale
+     */
+    public loadDefaultLocale(): void {
+        this.getDefaultLocale().then(locale => { this.defaultLocale = locale; });
     }
 
     /**
@@ -87,6 +93,11 @@ export class I18nResolver {
         return currentLocaleMap;
     }
 
+    /**
+     * make absolute i18n key based on relative key, depending on current file location
+     * @param key key to make absolute (a relative key begins with a period)
+     * @param currentFilename current file name / path
+     */
     public makeAbsoluteKey(key: string, currentFilename: string): string {
         if (!key.startsWith(".")) {
             return key;
@@ -112,16 +123,31 @@ export class I18nResolver {
         }
     }
 
-    public isValidI18nKey(key: string) {
+    /**
+     * check if i18n key is valid
+     * valid keys must include at least one period
+     * @param key i18n to validate
+     */
+    public isValidI18nKey(key: string): boolean {
         return key.indexOf(".") >= 0;
     }
 
+    /**
+     * find a i18n.translation call at position and return its range
+     * @param position position to look for the i18n call
+     * @param document current document
+     */
     public getRangeOfI18nKeyAtPosition(position: Position, document: TextDocument): Range {
-        let i18nCallRegex = /(I18n\.)?t[\(\s]+[\"\']{1}[\w+\.\/]+[\"\'\.]{1}\)?/g;
+        let i18nCallRegex = /(I18n\.)?t(ranslate)?[\(\s]+[\"\']{1}[\w+\.\/]+[\"\'\.]{1}\)?/g;
         return document.getWordRangeAtPosition(position, i18nCallRegex);
     }
 
+    /**
+     * get the i18n key as text from i18n call range 
+     * @param range range where i18n call occurs
+     * @param document current document
+     */
     public getI18nKeyAtRangeFromDocument(range: Range, document: TextDocument): string {
-        return document.getText(range).replace(/\"|\'|(I18n\.)?t[\(\s]+|\)/g, "");
+        return document.getText(range).replace(/\"|\'|(I18n\.)?t(ranslate)?[\(\s]+|\)/g, "");
     }
 }
