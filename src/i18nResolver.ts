@@ -79,6 +79,7 @@ export class I18nResolver {
         });
 
         if (currentLocaleMap !== null && typeof currentLocaleMap === "object") {
+            // convert object into text, each line consists of "key: value"
             let resultLines = [];
             Object.keys(currentLocaleMap).forEach(key => {
                 let text = currentLocaleMap[key];
