@@ -8,8 +8,7 @@ export let i18nResolver = new I18nResolver();
 
 export function activate(context: vscode.ExtensionContext) {
 
-    i18nResolver.loadDefaultLocale();
-    i18nResolver.loadYamlFiles();
+    i18nResolver.load();
 
     const HAML = { language: 'haml', scheme: 'file' };
     const ERB = { language: 'erb', scheme: 'file' };
