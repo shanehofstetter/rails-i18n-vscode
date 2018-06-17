@@ -8,8 +8,6 @@ export let i18nResolver = new I18nResolver();
 
 export function activate(context: vscode.ExtensionContext) {
 
-    console.log('extension "rails-i18n" activated');
-
     i18nResolver.loadDefaultLocale();
     i18nResolver.loadYamlFiles();
 
@@ -21,4 +19,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
+    i18nResolver.dispose();
 }

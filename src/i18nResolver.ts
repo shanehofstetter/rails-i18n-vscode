@@ -3,7 +3,7 @@ import * as merge from "merge";
 import * as vscode from 'vscode';
 import { Position, Range, TextDocument, workspace } from 'vscode';
 
-export class I18nResolver {
+export class I18nResolver implements vscode.Disposable {
 
     private locales;
     private defaultLocale = "en";
@@ -150,5 +150,11 @@ export class I18nResolver {
      */
     public getI18nKeyAtRangeFromDocument(range: Range, document: TextDocument): string {
         return document.getText(range).replace(/\"|\'|(I18n\.)?t(ranslate)?[\(\s]+|\)/g, "");
+    }
+
+    public dispose() {
+        if (this.fileSystemWatcher) {
+            this.fileSystemWatcher.dispose();
+        }
     }
 }
