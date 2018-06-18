@@ -33,6 +33,7 @@
     },
     "dependencies": {
         "@types/js-yaml": "^3.11.1",
+        "flat": "^4.0.0",
         "js-yaml": "^3.12.0",
         "merge": "^1.2.0"
     }

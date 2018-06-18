@@ -2,10 +2,12 @@ import { safeLoad } from "js-yaml";
 import * as merge from "merge";
 import * as vscode from 'vscode';
 import { workspace } from 'vscode';
+import { LookupMapGenerator } from './lookupMapGenerator';
 
 export class I18nResolver implements vscode.Disposable {
 
-    private localeMap = {};
+    private i18nTree = {};
+    private lookupMap = {};
     private defaultLocaleKey = "en";
     private fileSystemWatcher;
     private readonly yamlPattern = 'config/locales/**/*.yml';
@@ -14,20 +16,22 @@ export class I18nResolver implements vscode.Disposable {
      * load ressources
      */
     public load(): void {
-        this.loadYamlFiles();
-        this.loadDefaultLocale();
-        this.registerFileWatcher();
+        this.loadYamlFiles().then(_ => {
+            this.loadDefaultLocale();
+            this.generateLookupMap();
+            this.registerFileWatcher();
+        });
     }
 
     /**
      * load yaml locale files and generate single map out of them
      * register file watcher and reload changed files into map
      */
-    private loadYamlFiles(): void {
-        workspace.findFiles(this.yamlPattern).then(files => {
-            files.forEach(file => {
-                this.loadDocumentIntoMap(file.path);
-            });
+    private loadYamlFiles(): Thenable<any> {
+        return workspace.findFiles(this.yamlPattern).then(files => {
+            return Promise.all(files.map(file => {
+                return this.loadDocumentIntoMap(file.path);
+            }));
         });
     }
 
@@ -38,17 +42,17 @@ export class I18nResolver implements vscode.Disposable {
         });
     }
 
-    private loadDocumentIntoMap(filePath: string) {
-        workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-            this.localeMap = merge.recursive(false, this.localeMap, safeLoad(document.getText()));
+    private loadDocumentIntoMap(filePath: string): Thenable<void> {
+        return workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
+            this.i18nTree = merge.recursive(false, this.i18nTree, safeLoad(document.getText()));
         });
     }
 
     /**
      * load the default locale
      */
-    private loadDefaultLocale(): void {
-        this.getDefaultLocale().then(locale => { this.defaultLocaleKey = locale; });
+    private loadDefaultLocale(): Thenable<void> {
+        return this.getDefaultLocale().then(locale => { this.defaultLocaleKey = locale; });
     }
 
     /**
@@ -78,6 +82,13 @@ export class I18nResolver implements vscode.Disposable {
         }
 
         let keyParts = this.makeKeyParts(key);
+        let fullKey = keyParts.join(".");
+
+        let simpleLookupResult = this.lookupMap[fullKey];
+        if (typeof simpleLookupResult === "string") {
+            return simpleLookupResult;
+        }
+        
         let lookupResult = this.traverseThroughMap(keyParts);
         if (lookupResult !== null && typeof lookupResult === "object") {
             return this.transformMultiResultIntoText(lookupResult);
@@ -94,7 +105,7 @@ export class I18nResolver implements vscode.Disposable {
     }
 
     private traverseThroughMap(keyParts: string[]): any {
-        let result = this.localeMap;
+        let result = this.i18nTree;
         keyParts.forEach(keyPart => {
             if (result !== undefined) {
                 result = result[keyPart];
@@ -116,6 +127,10 @@ export class I18nResolver implements vscode.Disposable {
             resultLines.push(`${key}: ${text}`);
         });
         return resultLines.join("\n");
+    }
+
+    private generateLookupMap(): void {
+        this.lookupMap = new LookupMapGenerator(this.i18nTree).generateLookupMap();
     }
 
     public dispose() {
