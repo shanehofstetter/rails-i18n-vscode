@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { I18nHoverProvider } from './i18nHoverProvider';
 import { I18nResolver } from './i18nResolver';
+import { I18nCompletionProvider } from './i18nCompletionProvider';
 
 export let i18nResolver = new I18nResolver();
 
@@ -15,6 +16,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.languages.registerHoverProvider(HAML, new I18nHoverProvider()));
     context.subscriptions.push(vscode.languages.registerHoverProvider(ERB, new I18nHoverProvider()));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(HAML, new I18nCompletionProvider(), "."));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(ERB, new I18nCompletionProvider(), "."));
 }
 
 export function deactivate() {

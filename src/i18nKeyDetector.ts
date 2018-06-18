@@ -39,8 +39,8 @@ export class I18nKeyDetector {
      * @param currentFilename current file name / path
      */
     public static makeAbsoluteKey(key: string, currentFilename: string): string {
-        if (!key.startsWith(".")) {
-            return key; // already an absoulute key
+        if (!this.isRelativeKey(key)) {
+            return key;
         }
         try {
             // get the relative key from current file path, starting at directory "views"
@@ -61,5 +61,9 @@ export class I18nKeyDetector {
         } catch (Error) {
             return key;
         }
+    }
+
+    public static isRelativeKey(key: string): boolean {
+        return key.startsWith(".");
     }
 }

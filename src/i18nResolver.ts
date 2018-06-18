@@ -52,14 +52,18 @@ export class I18nResolver implements vscode.Disposable {
      * load the default locale
      */
     private loadDefaultLocale(): Thenable<void> {
-        return this.getDefaultLocale().then(locale => { this.defaultLocaleKey = locale; });
+        return this.readDefaultLocale().then(locale => { this.defaultLocaleKey = locale; });
+    }
+
+    public getDefaultLocaleKey():string{
+        return this.defaultLocaleKey;
     }
 
     /**
      * get the default locale configured in application.rb
      * @returns default locale key or 'en' as fallback if default cant be found
      */
-    private getDefaultLocale(): Thenable<string> {
+    private readDefaultLocale(): Thenable<string> {
         return workspace.openTextDocument(`${workspace.rootPath}/config/application.rb`).then((document: vscode.TextDocument) => {
             let searchResult = document.getText().search(/i18n\.default_locale/g);
             if (!searchResult) {
@@ -88,7 +92,7 @@ export class I18nResolver implements vscode.Disposable {
         if (typeof simpleLookupResult === "string") {
             return simpleLookupResult;
         }
-        
+
         let lookupResult = this.traverseThroughMap(keyParts);
         if (lookupResult !== null && typeof lookupResult === "object") {
             return this.transformMultiResultIntoText(lookupResult);
@@ -131,6 +135,10 @@ export class I18nResolver implements vscode.Disposable {
 
     private generateLookupMap(): void {
         this.lookupMap = new LookupMapGenerator(this.i18nTree).generateLookupMap();
+    }
+
+    public getLookupMap(): object {
+        return this.lookupMap;
     }
 
     public dispose() {
