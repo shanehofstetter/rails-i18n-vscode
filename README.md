@@ -5,6 +5,7 @@ I18n helper for Visual Studio Code
 ## Features
 
 - show translation (in default locale) when hovering over i18n keys in view files
+- provide autocompletion when typing i18n keys in view files
 
 ## Known Issues
 
@@ -14,4 +15,3 @@ I18n helper for Visual Studio Code
 - [ ] add a setting which when enabled shows translations in all available locales on hover
 - [ ] go to location of translation in yaml file with go-to-definition
 - [ ] go-to-definition does create key in yaml file if it does not already exist 
-- [ ] provide autocompletion when typing i18n keys in view files
