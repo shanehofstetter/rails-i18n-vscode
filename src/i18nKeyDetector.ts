@@ -42,14 +42,20 @@ export class I18nKeyDetector {
         if (!this.isRelativeKey(key)) {
             return key;
         }
+        let relativeKeyPart = this.getRelativeKeyPart(currentFilename);
+        if (!relativeKeyPart) {
+            return key;
+        }
+        return relativeKeyPart + key;
+    }
+
+    public static getRelativeKeyPart(currentFilename: string): string {
         try {
             // get the relative key from current file path, starting at directory "views"
             let relativeKey = currentFilename.split("views")[1].split(".")[0].replace(/\\|\//g, ".");
             if (relativeKey.startsWith(".")) {
                 relativeKey = relativeKey.substring(1);
             }
-
-            // remove all underlines at beginning of key parts
             let relativeKeyParts = relativeKey.split(".");
             relativeKeyParts = relativeKeyParts.map(keyPart => {
                 if (keyPart.startsWith("_")) {
@@ -57,9 +63,9 @@ export class I18nKeyDetector {
                 }
                 return keyPart;
             });
-            return relativeKeyParts.join(".") + key;
+            return relativeKeyParts.join(".");
         } catch (Error) {
-            return key;
+            return "";
         }
     }
 
