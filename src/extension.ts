@@ -16,8 +16,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.languages.registerHoverProvider(HAML, new I18nHoverProvider()));
     context.subscriptions.push(vscode.languages.registerHoverProvider(ERB, new I18nHoverProvider()));
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(HAML, new I18nCompletionProvider(), "."));
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(ERB, new I18nCompletionProvider(), "."));
+
+    const triggerCharacters = ".abcdefghijklmnopqrstuvwxyz".split("");
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(HAML, new I18nCompletionProvider(), ...triggerCharacters));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(ERB, new I18nCompletionProvider(), ...triggerCharacters));
 }
 
 export function deactivate() {

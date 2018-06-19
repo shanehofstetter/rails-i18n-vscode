@@ -6,13 +6,10 @@ export class I18nCompletionProvider implements CompletionItemProvider {
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext): ProviderResult<CompletionItem[] | CompletionList> {
         let range = I18nKeyDetector.getRangeOfI18nKeyAtPosition(position, document);
         let i18nKey = I18nKeyDetector.getI18nKeyAtRangeFromDocument(range, document);
-        let defaultLocaleKeyPrefix = i18nResolver.getDefaultLocaleKey() + ".";
-        let keyPrefix;
+        let keyPrefix = i18nResolver.getDefaultLocaleKey() + ".";
 
         if (I18nKeyDetector.isRelativeKey(i18nKey)) {
-            keyPrefix = defaultLocaleKeyPrefix + I18nKeyDetector.getRelativeKeyPart(document.fileName);
-        } else {
-            keyPrefix = defaultLocaleKeyPrefix;
+            keyPrefix += I18nKeyDetector.getRelativeKeyPart(document.fileName);
         }
 
         return this.buildCompletionItemList(keyPrefix, i18nKey);
@@ -31,9 +28,13 @@ export class I18nCompletionProvider implements CompletionItemProvider {
     }
 
     private buildCompletionItem(filteredKey: string, prefixToRemove: string, i18nKeyToComplete: string): CompletionItem {
+        // remove the prefix (locale key and possibly key-part relative to current file location)
         let relevantKey = filteredKey.substring(prefixToRemove.length);
+        // use the relevant key part as label for completion item
         let completionItem = new CompletionItem(relevantKey, CompletionItemKind.Value);
-        completionItem.insertText = relevantKey.substring(i18nKeyToComplete.length);
+        // current word gets replaced, so we need to provide the current full keypart that is being typed 
+        completionItem.insertText = relevantKey.substring(i18nKeyToComplete.lastIndexOf(".") + 1);
+        // provide the translation as additional info
         completionItem.detail = i18nResolver.getLookupMap()[filteredKey];
         return completionItem;
     }
