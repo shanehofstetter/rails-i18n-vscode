@@ -5,9 +5,15 @@ I18n helper for Visual Studio Code
 ## Features
 
 - show translation (in default locale) when hovering over i18n keys in view files
+![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/hover.gif)
+
 - provide autocompletion when typing i18n keys in view files
+![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/autocomplete.gif)
 
 ## Known Issues
+
+- default locale is only detected in `config/application.rb` at the moment (first found locale key is used instead if config can not be found)
+- when removing keys from yamls files, the removed keys are still suggested in autocompletion
 
 ## Release Notes
 
