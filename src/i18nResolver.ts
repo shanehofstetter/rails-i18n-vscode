@@ -2,6 +2,7 @@ import { safeLoad } from "js-yaml";
 import * as merge from "merge";
 import * as vscode from 'vscode';
 import { workspace } from 'vscode';
+import { I18nDefaultLocaleDetector } from './i18nDefaultLocaleDetector';
 import { LookupMapGenerator } from './lookupMapGenerator';
 
 export class I18nResolver implements vscode.Disposable {
@@ -54,11 +55,8 @@ export class I18nResolver implements vscode.Disposable {
      * load the default locale
      */
     private loadDefaultLocale(): Thenable<string> {
-        return this.readDefaultLocale().then(locale => {
-            if (!locale && this.i18nTree) {
-                locale = Object.keys(this.i18nTree)[0];
-            }
-            console.log('default locale:', locale);
+        let i18nLocaleDetector = new I18nDefaultLocaleDetector();
+        return i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locale => {
             this.defaultLocaleKey = locale;
             return this.defaultLocaleKey;
         });
@@ -66,24 +64,6 @@ export class I18nResolver implements vscode.Disposable {
 
     public getDefaultLocaleKey(): string {
         return this.defaultLocaleKey;
-    }
-
-    /**
-     * get the default locale configured in application.rb
-     * @returns default locale key or null if not found
-     */
-    private readDefaultLocale(): Thenable<string | null> {
-        // TODO: support more variants of default_locale configuration (e.g. via config/environments, config/initializers)
-        return workspace.openTextDocument(`${workspace.rootPath}/config/application.rb`).then((document: vscode.TextDocument) => {
-            let searchResult = document.getText().search(/[iI]18n\.default_locale/g);
-            if (searchResult === -1) {
-                return null;
-            }
-            let position = document.positionAt(searchResult);
-            let lineText = document.lineAt(position.line).text;
-            let locale = lineText.split("=")[1].replace(/\:|\ |\'|\"/g, "").trim();
-            return locale;
-        });
     }
 
     /**
