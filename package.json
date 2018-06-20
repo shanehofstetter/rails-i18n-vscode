@@ -4,6 +4,11 @@
     "description": "rails i18n helper",
     "version": "0.0.1",
     "publisher": "shanehofstetter",
+    "icon": "docs/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/shanehofstetter/rails-i18n-vscode"
+    },
     "engines": {
         "vscode": "^1.24.0"
     },
