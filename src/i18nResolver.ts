@@ -39,10 +39,12 @@ export class I18nResolver implements vscode.Disposable {
         this.fileSystemWatcher = workspace.createFileSystemWatcher(new vscode.RelativePattern(workspace.rootPath, this.yamlPattern));
         this.fileSystemWatcher.onDidChange((e: vscode.Uri) => {
             this.loadDocumentIntoMap(e.fsPath);
+            this.generateLookupMap();
         });
     }
 
     private loadDocumentIntoMap(filePath: string): Thenable<void> {
+        // TODO: detect removed keys and remove them from i18nTree
         return workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
             this.i18nTree = merge.recursive(false, this.i18nTree, safeLoad(document.getText()));
         });
@@ -51,13 +53,14 @@ export class I18nResolver implements vscode.Disposable {
     /**
      * load the default locale
      */
-    private loadDefaultLocale(): Thenable<void> {
+    private loadDefaultLocale(): Thenable<string> {
         return this.readDefaultLocale().then(locale => {
             if (!locale && this.i18nTree) {
                 locale = Object.keys(this.i18nTree)[0];
             }
             console.log('default locale:', locale);
             this.defaultLocaleKey = locale;
+            return this.defaultLocaleKey;
         });
     }
 
