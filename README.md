@@ -14,7 +14,6 @@ I18n helper for Visual Studio Code
 
 ## Known Issues
 
-- default locale is only detected in `config/application.rb` at the moment (first found locale key is used instead if config can not be found)
 - when removing keys from yamls files, the removed keys are still suggested in autocompletion
 
 ## Release Notes
