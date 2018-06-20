@@ -17,8 +17,8 @@ export class I18nResolver implements vscode.Disposable {
      */
     public load(): void {
         this.loadYamlFiles().then(_ => {
-            this.loadDefaultLocale();
             this.generateLookupMap();
+            this.loadDefaultLocale();
             this.registerFileWatcher();
         });
     }
@@ -52,22 +52,29 @@ export class I18nResolver implements vscode.Disposable {
      * load the default locale
      */
     private loadDefaultLocale(): Thenable<void> {
-        return this.readDefaultLocale().then(locale => { this.defaultLocaleKey = locale; });
+        return this.readDefaultLocale().then(locale => {
+            if (!locale && this.i18nTree) {
+                locale = Object.keys(this.i18nTree)[0];
+            }
+            console.log('default locale:', locale);
+            this.defaultLocaleKey = locale;
+        });
     }
 
-    public getDefaultLocaleKey():string{
+    public getDefaultLocaleKey(): string {
         return this.defaultLocaleKey;
     }
 
     /**
      * get the default locale configured in application.rb
-     * @returns default locale key or 'en' as fallback if default cant be found
+     * @returns default locale key or null if not found
      */
-    private readDefaultLocale(): Thenable<string> {
+    private readDefaultLocale(): Thenable<string | null> {
+        // TODO: support more variants of default_locale configuration (e.g. via config/environments, config/initializers)
         return workspace.openTextDocument(`${workspace.rootPath}/config/application.rb`).then((document: vscode.TextDocument) => {
-            let searchResult = document.getText().search(/i18n\.default_locale/g);
-            if (!searchResult) {
-                return "en";
+            let searchResult = document.getText().search(/[iI]18n\.default_locale/g);
+            if (searchResult === -1) {
+                return null;
             }
             let position = document.positionAt(searchResult);
             let lineText = document.lineAt(position.line).text;
@@ -103,7 +110,7 @@ export class I18nResolver implements vscode.Disposable {
 
     private makeKeyParts(key: string): string[] {
         let keys = key.split(".");
-        keys.unshift(this.defaultLocaleKey);
+        keys.unshift(this.getDefaultLocaleKey());
         keys = keys.filter(key => key.length > 0);
         return keys;
     }
