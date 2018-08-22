@@ -14,11 +14,12 @@ I18n helper for Visual Studio Code
 
 ## Known Issues
 
-- when removing keys from yamls files, the removed keys are still suggested in autocompletion
+- when removing keys from yaml files, the removed keys are still suggested in autocompletion
 
 ## Release Notes
 
 ## Roadmap
+- [ ] evaluate and parse all yaml files from `I18n.load_path`, use existing strategy as fallback 
 - [ ] add a setting which when enabled shows translations in all available locales on hover
 - [ ] go to location of translation in yaml file with go-to-definition
 - [ ] go-to-definition does create key in yaml file if it does not already exist 
