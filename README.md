@@ -4,6 +4,8 @@ I18n helper for Visual Studio Code
 
 ## Features
 
+- supported template languages: haml, erb and slim
+
 - show translation (in default locale) when hovering over i18n keys in view files
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/hover.gif)
