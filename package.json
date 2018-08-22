@@ -17,7 +17,8 @@
     ],
     "activationEvents": [
         "onLanguage:haml",
-        "onLanguage:erb"
+        "onLanguage:erb",
+        "onLanguage:slim"
     ],
     "main": "./out/extension",
     "contributes": {
