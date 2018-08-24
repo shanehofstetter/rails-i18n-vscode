@@ -1,4 +1,6 @@
 import { TextDocument, workspace } from "vscode";
+import { logger } from "./logger";
+import { raceSuccess } from "./promiseExtras";
 
 export class I18nDefaultLocaleDetector {
 
@@ -10,11 +12,9 @@ export class I18nDefaultLocaleDetector {
      */
     public detectDefaultLocale(): Thenable<string | null> {
         return workspace.findFiles(this.rbPattern).then(files => {
-            return Promise.all<string>(files.map(file => {
+            return raceSuccess(files.map(file => {
                 return this.detectConfigurationInFile(file.path);
-            })).then(values => {
-                return values.find(value => value != null);
-            })
+            }), () => Promise.resolve());
         });
     }
 
@@ -27,11 +27,12 @@ export class I18nDefaultLocaleDetector {
             if (i18nTree) {
                 if (locale && !this.translationsForLocaleExistInTree(locale, i18nTree)) {
                     let newDefault = this.getFallbackLocaleFromTree(i18nTree);
-                    console.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead`);
+                    logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead`);
                     locale = newDefault;
                 }
                 if (!locale) {
                     locale = this.getFallbackLocaleFromTree(i18nTree);
+                    logger.info('using fallback locale:', locale)
                 }
             }
             return locale;
@@ -39,18 +40,24 @@ export class I18nDefaultLocaleDetector {
     }
 
     private detectConfigurationInFile(filePath: string): Thenable<string | null> {
+        logger.debug('detectConfigurationInFile', filePath);
         return workspace.openTextDocument(filePath).then((document: TextDocument) => {
-            return this.detectConfigurationInDocument(document);
+            const detectedLocale = this.detectConfigurationInDocument(document);
+            if (detectedLocale) {
+                return Promise.resolve(detectedLocale);
+            }
+            return Promise.reject();
         });
     }
 
     private detectConfigurationInDocument(document: TextDocument): string | null {
-        let searchResult = document.getText().search(/^[\s]*[^\#]?[\s]*[\S\.]*i18n\.default_locale[\s]*=[\s]*[:]?[\S]{2,}/gmi);
+        let searchResult = document.getText().search(/^[\t ]*[^\#\r\n]?[\t ]*[\S\.]*i18n\.default_locale[\s]*=[\s]*[:]?[\S]{2,}/gmi);
         if (searchResult === -1) {
             return null;
         }
         let position = document.positionAt(searchResult);
         let lineText = document.lineAt(position.line).text.trim();
+        logger.debug('position', position, 'searchResult', searchResult, 'lineText', lineText);
         let locale = lineText.split("=")[1].replace(/\:|\ |\'|\"/g, "").trim();
         return locale;
     }
