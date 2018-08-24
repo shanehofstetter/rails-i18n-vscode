@@ -2,7 +2,7 @@
     "name": "rails-i18n",
     "displayName": "Rails i18n",
     "description": "rails i18n helper",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "shanehofstetter",
     "icon": "docs/icon.png",
     "repository": {
@@ -22,7 +22,23 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": []
+        "commands": [],
+        "configuration": {
+            "type": "object",
+            "title": "Rails I18n",
+            "properties": {
+                "railsI18n.debugLevel": {
+                    "type": [
+                        "integer"
+                    ],
+                    "enum": [
+                        0, 1, 2, 3
+                    ],
+                    "default": 1,
+                    "description": "logging verbosity (0 = all logs, 3 = only errors)"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
