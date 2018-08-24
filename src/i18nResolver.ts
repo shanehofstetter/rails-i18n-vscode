@@ -1,9 +1,10 @@
-import { safeLoad } from "js-yaml";
+import { safeLoad, load } from "js-yaml";
 import * as merge from "merge";
 import * as vscode from 'vscode';
 import { workspace } from 'vscode';
 import { I18nDefaultLocaleDetector } from './i18nDefaultLocaleDetector';
 import { LookupMapGenerator } from './lookupMapGenerator';
+import { logger } from "./logger";
 
 export class I18nResolver implements vscode.Disposable {
 
@@ -21,6 +22,8 @@ export class I18nResolver implements vscode.Disposable {
             this.generateLookupMap();
             this.loadDefaultLocale();
             this.registerFileWatcher();
+        }, error => {
+            logger.error(error);
         });
     }
 
@@ -31,6 +34,7 @@ export class I18nResolver implements vscode.Disposable {
     private loadYamlFiles(): Thenable<any> {
         return workspace.findFiles(this.yamlPattern).then(files => {
             return Promise.all(files.map(file => {
+                logger.debug('loading locale file:', file.path);
                 return this.loadDocumentIntoMap(file.path);
             }));
         });
@@ -47,7 +51,11 @@ export class I18nResolver implements vscode.Disposable {
     private loadDocumentIntoMap(filePath: string): Thenable<void> {
         // TODO: detect removed keys and remove them from i18nTree
         return workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-            this.i18nTree = merge.recursive(false, this.i18nTree, safeLoad(document.getText()));
+            try {
+                this.i18nTree = merge.recursive(false, this.i18nTree, load(document.getText()));
+            } catch (error) {
+                logger.error(filePath, error.message);
+            }
         });
     }
 
@@ -58,7 +66,10 @@ export class I18nResolver implements vscode.Disposable {
         let i18nLocaleDetector = new I18nDefaultLocaleDetector();
         return i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locale => {
             this.defaultLocaleKey = locale;
+            logger.info('default locale:', this.defaultLocaleKey);
             return this.defaultLocaleKey;
+        }, error => {
+            logger.error(error);
         });
     }
 
@@ -80,10 +91,12 @@ export class I18nResolver implements vscode.Disposable {
 
         let simpleLookupResult = this.lookupMap[fullKey];
         if (typeof simpleLookupResult === "string") {
+            logger.debug('key:', key, 'fullKey:', fullKey, 'simpleLookupResult:', simpleLookupResult);
             return simpleLookupResult;
         }
 
         let lookupResult = this.traverseThroughMap(keyParts);
+        logger.debug('key:', key, 'fullKey:', fullKey, 'lookupResult:', lookupResult);
         if (lookupResult !== null && typeof lookupResult === "object") {
             return this.transformMultiResultIntoText(lookupResult);
         }
