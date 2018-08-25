@@ -2,31 +2,24 @@ import { TextDocument, workspace, Uri, WorkspaceFolder, RelativePattern } from "
 import { logger } from "./logger";
 import { raceSuccess } from "./promiseExtras";
 
+type WorkspaceFolderConfig = { workspaceFolderName: string; locale: string; };
+export type LocaleDefaults = { [workspaceFolderName: string]: string };
+
 export class I18nDefaultLocaleDetector {
 
     private readonly rbPattern = 'config/**/*.rb';
-    private workspaceFolderDefaults: { [workspaceFolderName: string]: string } = {};
+    private workspaceFolderDefaults: LocaleDefaults = {};
 
     /**
      * detect configured i18n default locale with fallback to one of the available locales
      * @param i18nTree translations tree to get the fallback from
      */
-    public detectDefaultLocaleWithFallback(i18nTree: object): Thenable<any> {
+    public detectDefaultLocaleWithFallback(i18nTree: object): Thenable<LocaleDefaults> {
         return this.detectDefaultLocales().then(locales => {
             locales.forEach(workspaceFolderConfig => {
                 let locale = workspaceFolderConfig.locale;
 
-                if (i18nTree) {
-                    if (locale && !this.translationsForLocaleExistInTree(locale, i18nTree, workspaceFolderConfig.workspaceFolderName)) {
-                        let newDefault = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
-                        logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead`);
-                        locale = newDefault;
-                    }
-                    if (!locale) {
-                        locale = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
-                        logger.info('using fallback locale:', locale)
-                    }
-                }
+                locale = this.getFallbackLocaleIfNotAvailable(i18nTree, locale, workspaceFolderConfig);
 
                 this.workspaceFolderDefaults[workspaceFolderConfig.workspaceFolderName] = locale;
             })
@@ -34,14 +27,33 @@ export class I18nDefaultLocaleDetector {
         })
     }
 
+    /**
+     * get the default locale for an uri
+     * @param uri file uri
+     */
     public getDefaultLocaleForUri(uri: Uri): string {
         return this.workspaceFolderDefaults[workspace.getWorkspaceFolder(uri).name];
     }
 
+    private getFallbackLocaleIfNotAvailable(i18nTree: object, locale: string, workspaceFolderConfig: WorkspaceFolderConfig): string {
+        if (i18nTree) {
+            if (locale && !this.translationsForLocaleExistInTree(locale, i18nTree, workspaceFolderConfig.workspaceFolderName)) {
+                let newDefault = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
+                logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead`);
+                locale = newDefault;
+            }
+            if (!locale) {
+                locale = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
+                logger.info('using fallback locale:', locale);
+            }
+        }
+        return locale;
+    }
+
     /**
-         * detect configured i18n default locale
-         * @returns default locale key or null if not found
-         */
+    * detect configured i18n default locale
+    * @returns default locale key or null if not found
+    */
     private detectDefaultLocale(workspaceFolder: WorkspaceFolder): Thenable<string | null> {
         return workspace.findFiles(new RelativePattern(workspaceFolder, this.rbPattern)).then(uris => {
             return raceSuccess(uris.map(uri => {
@@ -50,7 +62,7 @@ export class I18nDefaultLocaleDetector {
         });
     }
 
-    private detectDefaultLocales(): Thenable<{ workspaceFolderName: string, locale: string }[]> {
+    private detectDefaultLocales(): Thenable<WorkspaceFolderConfig[]> {
         return Promise.all(workspace.workspaceFolders.map(workspaceFolder => {
             return this.detectDefaultLocale(workspaceFolder).then(locale => {
                 return Promise.resolve({
