@@ -1,7 +1,7 @@
-import { safeLoad, load } from "js-yaml";
+import { load } from "js-yaml";
 import * as merge from "merge";
 import * as vscode from 'vscode';
-import { workspace } from 'vscode';
+import { workspace, Uri, window } from 'vscode';
 import { I18nDefaultLocaleDetector } from './i18nDefaultLocaleDetector';
 import { LookupMapGenerator } from './lookupMapGenerator';
 import { logger } from "./logger";
@@ -10,9 +10,9 @@ export class I18nResolver implements vscode.Disposable {
 
     private i18nTree = {};
     private lookupMap = {};
-    private defaultLocaleKey = "en";
     private fileSystemWatcher;
     private readonly yamlPattern = 'config/locales/**/*.yml';
+    private i18nLocaleDetector: I18nDefaultLocaleDetector;
 
     /**
      * load ressources
@@ -32,61 +32,76 @@ export class I18nResolver implements vscode.Disposable {
      * register file watcher and reload changed files into map
      */
     private loadYamlFiles(): Thenable<any> {
+        logger.debug('workspace folders', workspace.workspaceFolders);
         return workspace.findFiles(this.yamlPattern).then(files => {
             return Promise.all(files.map(file => {
                 logger.debug('loading locale file:', file.path);
-                return this.loadDocumentIntoMap(file.path);
+                return this.loadDocumentIntoMap(file);
             }));
         });
     }
 
     private registerFileWatcher(): void {
-        this.fileSystemWatcher = workspace.createFileSystemWatcher(new vscode.RelativePattern(workspace.rootPath, this.yamlPattern));
-        this.fileSystemWatcher.onDidChange((e: vscode.Uri) => {
-            this.loadDocumentIntoMap(e.fsPath);
+        this.fileSystemWatcher = workspace.createFileSystemWatcher('**/' + this.yamlPattern);
+        this.fileSystemWatcher.onDidChange((e: Uri) => {
+            logger.debug('reloading locale file:', e.path);
+            this.loadDocumentIntoMap(e);
             this.generateLookupMap();
         });
     }
 
-    private loadDocumentIntoMap(filePath: string): Thenable<void> {
+    private loadDocumentIntoMap(file: Uri): Thenable<void> {
         // TODO: detect removed keys and remove them from i18nTree
-        return workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
+        return workspace.openTextDocument(file.path).then((document: vscode.TextDocument) => {
             try {
-                this.i18nTree = merge.recursive(false, this.i18nTree, load(document.getText()));
+                const workspaceName = workspace.getWorkspaceFolder(file).name;
+                this.i18nTree = merge.recursive(
+                    false,
+                    this.i18nTree,
+                    {
+                        [workspaceName]: load(document.getText())
+                    }
+                );
             } catch (error) {
-                logger.error(filePath, error.message);
+                logger.error(file.path, error.message);
             }
         });
     }
 
     /**
-     * load the default locale
+     * load the default locales for all folders in workspace
      */
-    private loadDefaultLocale(): Thenable<string> {
-        let i18nLocaleDetector = new I18nDefaultLocaleDetector();
-        return i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locale => {
-            this.defaultLocaleKey = locale;
-            logger.info('default locale:', this.defaultLocaleKey);
-            return this.defaultLocaleKey;
+    private loadDefaultLocale(): Thenable<any> {
+        this.i18nLocaleDetector = new I18nDefaultLocaleDetector();
+        return this.i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locales => {
+            logger.info('default locales:', locales);
         }, error => {
             logger.error(error);
         });
     }
 
-    public getDefaultLocaleKey(): string {
-        return this.defaultLocaleKey;
+    public getDefaultLocaleKey(uri: Uri): string {
+        return this.i18nLocaleDetector.getDefaultLocaleForUri(uri);
     }
 
     /**
      * resolve text value for i18n key in default locale
      * @param key i18n key (e.g. "hello.world")
      */
-    public getTranslationForKey(key: string): any {
+    public getTranslationForKey(key: string, locale?: string, sourceUri?: Uri): any {
         if (!key) {
             return null;
         }
 
-        let keyParts = this.makeKeyParts(key);
+        if (!locale) {
+            locale = this.i18nLocaleDetector.getDefaultLocaleForUri(window.activeTextEditor.document.uri);
+        }
+
+        if (!sourceUri) {
+            sourceUri = window.activeTextEditor.document.uri;
+        }
+
+        let keyParts = this.makeKeyParts(key, locale, workspace.getWorkspaceFolder(sourceUri).name);
         let fullKey = keyParts.join(".");
 
         let simpleLookupResult = this.lookupMap[fullKey];
@@ -104,9 +119,10 @@ export class I18nResolver implements vscode.Disposable {
         return lookupResult;
     }
 
-    private makeKeyParts(key: string): string[] {
+    private makeKeyParts(key: string, locale: string, workspaceFolderName: string): string[] {
         let keys = key.split(".");
-        keys.unshift(this.getDefaultLocaleKey());
+        keys.unshift(locale);
+        keys.unshift(workspaceFolderName);
         keys = keys.filter(key => key.length > 0);
         return keys;
     }
