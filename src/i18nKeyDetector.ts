@@ -7,11 +7,10 @@ export class I18nKeyDetector {
 
     /**
      * check if i18n key is valid
-     * valid keys must include at least one period
      * @param key i18n to validate
      */
     public static isValidI18nKey(key: string): boolean {
-        return typeof key === "string" && key.indexOf(".") >= 0;
+        return typeof key === "string";
     }
 
     /**
