@@ -22,6 +22,8 @@ Rails I18n helper for Visual Studio Code
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/autocomplete.gif)
 
+- supports multiple workspace folders
+
 ## Known Issues
 
 - when removing keys from yaml files, the removed keys are still suggested in autocompletion

@@ -1,5 +1,7 @@
 # Change Log
 
+- support workspace with multiple folders
+
 ## 0.0.4
 - Add Logging and configurable loglevel
 - improve default locale detection with config file parsing strategy
