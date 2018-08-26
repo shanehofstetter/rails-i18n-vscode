@@ -51,7 +51,7 @@
                     "type": [
                         "boolean"
                     ],
-                    "default": "false",
+                    "default": false,
                     "description": "load all translation files configured in I18n.load_path"
                 }
             }
