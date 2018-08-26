@@ -5,6 +5,7 @@ import { workspace, Uri, window } from 'vscode';
 import { I18nDefaultLocaleDetector } from './i18nDefaultLocaleDetector';
 import { LookupMapGenerator } from './lookupMapGenerator';
 import { logger } from "./logger";
+import { RailsCommands } from "./railsCommands";
 
 export class I18nResolver implements vscode.Disposable {
 
@@ -14,10 +15,8 @@ export class I18nResolver implements vscode.Disposable {
     private readonly yamlPattern = 'config/locales/**/*.yml';
     private i18nLocaleDetector: I18nDefaultLocaleDetector;
 
-    /**
-     * load ressources
-     */
     public load(): Thenable<any> {
+        this.init();
         return this.loadYamlFiles().then(_ => {
             this.generateLookupMap();
             this.registerFileWatcher();
@@ -25,50 +24,66 @@ export class I18nResolver implements vscode.Disposable {
         });
     }
 
-    /**
-     * load yaml locale files and generate single map out of them
-     * register file watcher and reload changed files into map
-     */
+    private init(): void {
+        this.i18nTree = {};
+        this.lookupMap = {};
+    }
+
     private loadYamlFiles(): Thenable<any> {
-        logger.debug('workspace folders:', workspace.workspaceFolders);
-        return workspace.findFiles(this.yamlPattern).then(files => {
-            return Promise.all(files.map(file => {
-                logger.debug('loading locale file:', file.path);
-                return this.loadDocumentIntoMap(file);
-            }));
-        });
+        return Promise.all(workspace.workspaceFolders.map(workspaceFolder => {
+            logger.debug('loading yaml files for workspace dir:', workspaceFolder.name);
+            return this.getYamlFilesForWorkspaceFolder(workspaceFolder).then(files => {
+                return Promise.all(files.map(file => {
+                    logger.debug('loading locale file:', file.path);
+                    return this.loadYamlIntoTree(file, workspaceFolder);
+                }));
+            })
+        }))
+    }
+
+    private getYamlFilesForWorkspaceFolder(workspaceFolder: vscode.WorkspaceFolder): Thenable<Uri[]> {
+        const loadAllFiles: boolean = workspace.getConfiguration('railsI18n').get<boolean>('loadAllTranslations');
+        logger.debug('loadAllFiles:', loadAllFiles, 'workspace dir:', workspaceFolder.name);
+        if (loadAllFiles === true) {
+            return RailsCommands.getLoadPaths(workspaceFolder).then(filePaths => {
+                return filePaths.map(filePath => Uri.file(filePath));
+            });
+        }
+        return workspace.findFiles(this.yamlPattern);
     }
 
     private registerFileWatcher(): void {
+        if (this.fileSystemWatcher) {
+            this.fileSystemWatcher.dispose();
+        }
         this.fileSystemWatcher = workspace.createFileSystemWatcher('**/' + this.yamlPattern);
         this.fileSystemWatcher.onDidChange((e: Uri) => {
             logger.debug('reloading locale file:', e.path);
-            this.loadDocumentIntoMap(e);
+            this.loadYamlIntoTree(e);
             this.generateLookupMap();
         });
     }
 
-    private loadDocumentIntoMap(file: Uri): Thenable<void> {
+    private loadYamlIntoTree(file: Uri, workspaceFolder?: vscode.WorkspaceFolder): Thenable<void> {
         // TODO: detect removed keys and remove them from i18nTree
         return workspace.openTextDocument(file.path).then((document: vscode.TextDocument) => {
             try {
-                const workspaceName = workspace.getWorkspaceFolder(file).name;
+                if (!workspaceFolder) {
+                    workspaceFolder = workspace.getWorkspaceFolder(file);
+                }
                 this.i18nTree = merge.recursive(
                     false,
                     this.i18nTree,
                     {
-                        [workspaceName]: load(document.getText())
+                        [workspaceFolder.name]: load(document.getText())
                     }
                 );
             } catch (error) {
-                logger.error(file.path, error.message);
+                logger.error('loadDocumentIntoMap', file.path, error.message);
             }
         });
     }
 
-    /**
-     * load the default locales for all folders in workspace
-     */
     private loadDefaultLocale(): Thenable<any> {
         this.i18nLocaleDetector = new I18nDefaultLocaleDetector();
         return this.i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locales => {
