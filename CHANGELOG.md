@@ -1,6 +1,7 @@
 # Change Log
 
 - support workspace with multiple folders
+- call rails to get default locale configured for project
 
 ## 0.0.4
 - Add Logging and configurable loglevel
