@@ -8,8 +8,12 @@ import { I18nCompletionProvider } from './i18nCompletionProvider';
 export let i18nResolver = new I18nResolver();
 
 export function activate(context: vscode.ExtensionContext) {
+    vscode.window.withProgress({
+        location: vscode.ProgressLocation.Window,
+        title: "Loading translations.."
+    }, () => i18nResolver.load());
 
-    i18nResolver.load();
+    context.subscriptions.push(i18nResolver);
 
     const documentFilters = [
         { language: 'haml', scheme: 'file' },
@@ -21,8 +25,4 @@ export function activate(context: vscode.ExtensionContext) {
 
     const triggerCharacters = ".abcdefghijklmnopqrstuvwxyz".split("");
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(documentFilters, new I18nCompletionProvider(), ...triggerCharacters));
-}
-
-export function deactivate() {
-    i18nResolver.dispose();
 }

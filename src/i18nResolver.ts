@@ -17,13 +17,11 @@ export class I18nResolver implements vscode.Disposable {
     /**
      * load ressources
      */
-    public load(): void {
-        this.loadYamlFiles().then(_ => {
+    public load(): Thenable<any> {
+        return this.loadYamlFiles().then(_ => {
             this.generateLookupMap();
-            this.loadDefaultLocale();
             this.registerFileWatcher();
-        }, error => {
-            logger.error(error);
+            return this.loadDefaultLocale();
         });
     }
 
@@ -32,7 +30,7 @@ export class I18nResolver implements vscode.Disposable {
      * register file watcher and reload changed files into map
      */
     private loadYamlFiles(): Thenable<any> {
-        logger.debug('workspace folders', workspace.workspaceFolders);
+        logger.debug('workspace folders:', workspace.workspaceFolders);
         return workspace.findFiles(this.yamlPattern).then(files => {
             return Promise.all(files.map(file => {
                 logger.debug('loading locale file:', file.path);
