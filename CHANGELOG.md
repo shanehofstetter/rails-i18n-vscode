@@ -1,5 +1,6 @@
 # Change Log
 
+## 0.0.5
 - support workspace with multiple folders
 - call rails to get default locale configured for project
 
