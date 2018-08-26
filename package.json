@@ -32,10 +32,20 @@
                         "integer"
                     ],
                     "enum": [
-                        0, 1, 2, 3
+                        0,
+                        1,
+                        2,
+                        3
                     ],
                     "default": 1,
                     "description": "logging verbosity (0 = all logs, 3 = only errors)"
+                },
+                "railsI18n.pathToRails": {
+                    "type": [
+                        "string"
+                    ],
+                    "default": "rails",
+                    "description": "rails command"
                 }
             }
         }
@@ -55,6 +65,7 @@
     },
     "dependencies": {
         "@types/js-yaml": "^3.11.1",
+        "execa": "^0.11.0",
         "flat": "^4.0.0",
         "js-yaml": "^3.12.0",
         "merge": "^1.2.0"
