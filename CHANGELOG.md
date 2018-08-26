@@ -1,5 +1,9 @@
 # Change Log
 
+- use fallback strategies when rails calls fail
+- reload translations when workspace changes
+- evaluate I18n.load_path (configurable)
+
 ## 0.0.5
 - support workspace with multiple folders
 - call rails to get default locale configured for project
