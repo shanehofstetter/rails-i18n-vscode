@@ -46,6 +46,13 @@
                     ],
                     "default": "rails",
                     "description": "rails command"
+                },
+                "railsI18n.loadAllTranslations": {
+                    "type": [
+                        "boolean"
+                    ],
+                    "default": "false",
+                    "description": "load all translation files configured in I18n.load_path"
                 }
             }
         }
