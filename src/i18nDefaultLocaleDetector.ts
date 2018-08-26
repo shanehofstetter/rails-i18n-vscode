@@ -38,7 +38,7 @@ export class I18nDefaultLocaleDetector {
         if (i18nTree) {
             if (locale && !this.translationsForLocaleExistInTree(locale, i18nTree, workspaceFolderConfig.workspaceFolderName)) {
                 let newDefault = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
-                logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead`);
+                logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead.`, 'workspace dir:', workspaceFolderConfig.workspaceFolderName);
                 locale = newDefault;
             }
             if (!locale) {
