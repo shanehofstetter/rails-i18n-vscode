@@ -7,7 +7,7 @@ export class RailsCommands {
         return RailsCommands.callRails(['runner', 'puts "default_locale=#{I18n.default_locale}"'], workspaceFolder).then((result) => {
             const defaultLocale: string = result.split('=')[1].trim();
             logger.debug('default locale from rails:', defaultLocale);
-            if (defaultLocale && defaultLocale.length > 1) {
+            if (defaultLocale) {
                 return Promise.resolve(defaultLocale);
             }
             return Promise.reject();
@@ -27,8 +27,11 @@ export class RailsCommands {
             if (result.code === 0) {
                 return Promise.resolve(result.stdout);
             }
-            logger.warn('rails command failed:', railsCommand, args, result.code, result.stderr);
+            logger.warn('rails command returned error:', railsCommand, args, result.code, result.stderr);
             return Promise.reject(result.stderr);
+        }, error => {
+            logger.error('rails command failed:', error.message);
+            return Promise.reject(error.message);
         });
     }
 }

@@ -64,12 +64,17 @@ export class I18nDefaultLocaleDetector {
                     workspaceFolderName: workspaceFolder.name,
                     locale: locale
                 });
+            }, _ => {
+                logger.warn('could not get default locale for workspace dir:', workspaceFolder.name)
+                return Promise.resolve({
+                    workspaceFolderName: workspaceFolder.name,
+                    locale: null
+                });
             })
         }))
     }
 
     private translationsForLocaleExistInTree(locale: string, tree: object, workspaceFolderName: string): boolean {
-        logger.debug('translationsForLocaleExistInTree', locale, tree, workspaceFolderName);
         return !!Object.keys(tree[workspaceFolderName]).find(key => key === locale);
     }
 
