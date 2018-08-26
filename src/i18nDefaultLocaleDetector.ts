@@ -1,13 +1,12 @@
-import { TextDocument, workspace, Uri, WorkspaceFolder, RelativePattern } from "vscode";
+import { workspace, Uri, WorkspaceFolder } from "vscode";
 import { logger } from "./logger";
-import { raceSuccess } from "./promiseExtras";
+import { RailsCommands } from "./railsCommands";
 
 type WorkspaceFolderConfig = { workspaceFolderName: string; locale: string; };
 export type LocaleDefaults = { [workspaceFolderName: string]: string };
 
 export class I18nDefaultLocaleDetector {
 
-    private readonly rbPattern = 'config/**/*.rb';
     private workspaceFolderDefaults: LocaleDefaults = {};
 
     /**
@@ -55,11 +54,7 @@ export class I18nDefaultLocaleDetector {
     * @returns default locale key or null if not found
     */
     private detectDefaultLocale(workspaceFolder: WorkspaceFolder): Thenable<string | null> {
-        return workspace.findFiles(new RelativePattern(workspaceFolder, this.rbPattern)).then(uris => {
-            return raceSuccess(uris.map(uri => {
-                return this.detectConfigurationInUri(uri);
-            }), () => Promise.resolve());
-        });
+        return RailsCommands.getDefaultLocale(workspaceFolder);
     }
 
     private detectDefaultLocales(): Thenable<WorkspaceFolderConfig[]> {
@@ -71,28 +66,6 @@ export class I18nDefaultLocaleDetector {
                 });
             })
         }))
-    }
-
-    private detectConfigurationInUri(uri: Uri): Thenable<string | null> {
-        return workspace.openTextDocument(uri).then((document: TextDocument) => {
-            const detectedLocale = this.detectConfigurationInDocument(document);
-            if (detectedLocale) {
-                return Promise.resolve(detectedLocale);
-            }
-            return Promise.reject();
-        });
-    }
-
-    private detectConfigurationInDocument(document: TextDocument): string | null {
-        let searchResult = document.getText().search(/^[\t ]*[^\#\r\n]?[\t ]*[\S\.]*i18n\.default_locale[\s]*=[\s]*[:]?[\S]{2,}/gmi);
-        if (searchResult === -1) {
-            return null;
-        }
-        let position = document.positionAt(searchResult);
-        let lineText = document.lineAt(position.line).text.trim();
-        logger.debug('detectConfigurationInDocument', 'position', position, 'searchResult', searchResult, 'lineText', lineText);
-        let locale = lineText.split("=")[1].replace(/\:|\ |\'|\"/g, "").trim();
-        return locale;
     }
 
     private translationsForLocaleExistInTree(locale: string, tree: object, workspaceFolderName: string): boolean {
