@@ -47,6 +47,9 @@ export class I18nResolver implements vscode.Disposable {
         if (loadAllFiles === true) {
             return RailsCommands.getLoadPaths(workspaceFolder).then(filePaths => {
                 return filePaths.map(filePath => Uri.file(filePath));
+            }, error => {
+                logger.warn('loading translation file paths failed, using file pattern..');
+                return workspace.findFiles(this.yamlPattern);
             });
         }
         return workspace.findFiles(this.yamlPattern);

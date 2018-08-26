@@ -1,6 +1,7 @@
 import { workspace, Uri, WorkspaceFolder } from "vscode";
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
+import { RailsConfigFileParser } from "./railsConfigFileParser";
 
 type WorkspaceFolderConfig = { workspaceFolderName: string; locale: string; };
 export type LocaleDefaults = { [workspaceFolderName: string]: string };
@@ -54,7 +55,10 @@ export class I18nDefaultLocaleDetector {
     * @returns default locale key or null if not found
     */
     private detectDefaultLocale(workspaceFolder: WorkspaceFolder): Thenable<string | null> {
-        return RailsCommands.getDefaultLocale(workspaceFolder);
+        return RailsCommands.getDefaultLocale(workspaceFolder).then(locale => Promise.resolve(locale), error => {
+            logger.warn('failed to get default locale from rails, parsing config files..');
+            return new RailsConfigFileParser().detectDefaultLocaleForWorkspaceFolder(workspaceFolder);
+        });
     }
 
     private detectDefaultLocales(): Thenable<WorkspaceFolderConfig[]> {
