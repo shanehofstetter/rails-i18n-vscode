@@ -15,7 +15,10 @@ export class I18nDefaultLocaleDetector {
      * @param i18nTree translations tree to get the fallback from
      */
     public detectDefaultLocaleWithFallback(i18nTree: object): Thenable<LocaleDefaults> {
-        return this.detectDefaultLocales().then(locales => {
+        // TODO: refactor, parameter should be a custom i18ntree-wrapper which provides a method to get the 
+        // relevant workspacefolders as vscode.WorkspaceFolder objects
+        const workspaceFolderNames = Object.keys(i18nTree);
+        return this.detectDefaultLocales(workspaceFolderNames).then(locales => {
             locales.forEach(workspaceFolderConfig => {
                 let locale = workspaceFolderConfig.locale;
 
@@ -61,8 +64,10 @@ export class I18nDefaultLocaleDetector {
         });
     }
 
-    private detectDefaultLocales(): Thenable<WorkspaceFolderConfig[]> {
-        return Promise.all(workspace.workspaceFolders.map(workspaceFolder => {
+    private detectDefaultLocales(workspaceFolderNames: string[]): Thenable<WorkspaceFolderConfig[]> {
+        // TODO: refactor, parameter should be a list of vscode.WorkspaceFolder objects
+        const workspaceFolders = workspace.workspaceFolders.filter(workspaceFolder => workspaceFolderNames.indexOf(workspaceFolder.name) >= 0);
+        return Promise.all(workspaceFolders.map(workspaceFolder => {
             return this.detectDefaultLocale(workspaceFolder).then(locale => {
                 return Promise.resolve({
                     workspaceFolderName: workspaceFolder.name,
@@ -79,10 +84,16 @@ export class I18nDefaultLocaleDetector {
     }
 
     private translationsForLocaleExistInTree(locale: string, tree: object, workspaceFolderName: string): boolean {
+        // TODO: refactor, move this into i18ntree wrapper class (to be implemented)
         return !!Object.keys(tree[workspaceFolderName]).find(key => key === locale);
     }
 
     private getFallbackLocaleFromTree(tree: object, workspaceFolderName: string): string {
-        return Object.keys(tree[workspaceFolderName])[0];
+        // TODO: refactor, move this into i18ntree wrapper class (to be implemented)
+        const workspaceTranslations = tree[workspaceFolderName];
+        if (workspaceTranslations) {
+            return Object.keys(workspaceTranslations)[0];
+        }
+        return 'en';
     }
 }

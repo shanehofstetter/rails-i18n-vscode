@@ -44,15 +44,26 @@ export class I18nResolver implements vscode.Disposable {
     private getYamlFilesForWorkspaceFolder(workspaceFolder: vscode.WorkspaceFolder): Thenable<Uri[]> {
         const loadAllFiles: boolean = workspace.getConfiguration('railsI18n').get<boolean>('loadAllTranslations');
         logger.debug('loadAllFiles:', loadAllFiles, 'workspace dir:', workspaceFolder.name);
-        if (loadAllFiles === true) {
+
+        return workspace.findFiles(this.yamlPattern).then(files => {
+            files = files.filter(file => workspace.getWorkspaceFolder(file).uri.path === workspaceFolder.uri.path)
+            
+            if (files.length === 0) {
+                logger.warn(`no locale files in project dir found, ${workspaceFolder.uri.path} is probably not a rails project.`);
+                return files;
+            }
+
+            if (!loadAllFiles) {
+                return files;
+            }
+
             return RailsCommands.getLoadPaths(workspaceFolder).then(filePaths => {
                 return filePaths.map(filePath => Uri.file(filePath));
             }, error => {
                 logger.warn('loading translation file paths failed, using file pattern..');
                 return workspace.findFiles(this.yamlPattern);
             });
-        }
-        return workspace.findFiles(this.yamlPattern);
+        })
     }
 
     private registerFileWatcher(): void {
