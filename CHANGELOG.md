@@ -1,5 +1,6 @@
 # Change Log
 
+## 0.0.6
 - use fallback strategies when rails calls fail
 - reload translations when workspace changes
 - evaluate I18n.load_path (configurable)
