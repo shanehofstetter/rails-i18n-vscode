@@ -14,15 +14,16 @@ Rails I18n helper for Visual Studio Code
 ## Features
 
 - supported template languages: haml, erb and slim
-- show translation (in default locale) when hovering over i18n keys in view files
+- shows translation (in default locale) when hovering over i18n keys in view files
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/hover.gif)
 
-- provide autocompletion when typing i18n keys in view files
+- provides autocompletion when typing i18n keys in view files
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/autocomplete.gif)
 
 - supports multiple workspace folders
+- evaluates and parses yaml files configured in `I18n.load_path` (turned off per default, turn it on by setting `railsI18n.loadAllTranslations` to `true`)
 
 ## Known Issues
 
@@ -31,8 +32,7 @@ Rails I18n helper for Visual Studio Code
 
 ## Release Notes
 
-## Roadmap
-- [x] evaluate and parse all yaml files from `I18n.load_path`, use existing strategy as fallback 
+## Planned Features
 - [ ] add a setting which when enabled shows translations in all available locales on hover
 - [ ] go to location of translation in yaml file with go-to-definition
 - [ ] go-to-definition does create key in yaml file if it does not already exist 
