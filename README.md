@@ -1,5 +1,6 @@
 # Rails i18n
 
+[![Build Status](https://travis-ci.org/shanehofstetter/rails-i18n-vscode.svg?branch=master)](https://travis-ci.org/shanehofstetter/rails-i18n-vscode)
 [![](https://vsmarketplacebadge.apphb.com/version/shanehofstetter.rails-i18n.svg
 )](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
 [![](https://vsmarketplacebadge.apphb.com/installs-short/shanehofstetter.rails-i18n.svg
