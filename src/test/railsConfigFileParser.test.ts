@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { I18nKeyDetector } from '../i18nKeyDetector';
+import { KeyDetector } from '../keyDetector';
 import { RailsConfigFileParser } from '../railsConfigFileParser';
 import * as vscode from 'vscode';
 import * as path from 'path';

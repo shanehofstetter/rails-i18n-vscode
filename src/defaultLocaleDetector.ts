@@ -6,7 +6,7 @@ import { RailsConfigFileParser } from "./railsConfigFileParser";
 type WorkspaceFolderConfig = { workspaceFolderName: string; locale: string; };
 export type LocaleDefaults = { [workspaceFolderName: string]: string };
 
-export class I18nDefaultLocaleDetector {
+export class DefaultLocaleDetector {
 
     private workspaceFolderDefaults: LocaleDefaults = {};
 

@@ -2,7 +2,7 @@ import { load } from "js-yaml";
 import * as merge from "merge";
 import * as vscode from 'vscode';
 import { workspace, Uri, window } from 'vscode';
-import { I18nDefaultLocaleDetector } from './i18nDefaultLocaleDetector';
+import { DefaultLocaleDetector } from './defaultLocaleDetector';
 import { LookupMapGenerator } from './lookupMapGenerator';
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
@@ -13,7 +13,7 @@ export class I18nResolver implements vscode.Disposable {
     private lookupMap = {};
     private fileSystemWatcher;
     private readonly yamlPattern = 'config/locales/**/*.yml';
-    private i18nLocaleDetector: I18nDefaultLocaleDetector;
+    private i18nLocaleDetector: DefaultLocaleDetector;
 
     public load(): Thenable<any> {
         this.init();
@@ -99,7 +99,7 @@ export class I18nResolver implements vscode.Disposable {
     }
 
     private loadDefaultLocale(): Thenable<any> {
-        this.i18nLocaleDetector = new I18nDefaultLocaleDetector();
+        this.i18nLocaleDetector = new DefaultLocaleDetector();
         return this.i18nLocaleDetector.detectDefaultLocaleWithFallback(this.i18nTree).then(locales => {
             logger.info('default locales:', locales);
         }, error => {

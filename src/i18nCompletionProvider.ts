@@ -1,17 +1,17 @@
 import { CancellationToken, CompletionContext, CompletionItem, CompletionItemProvider, CompletionList, Position, ProviderResult, TextDocument, CompletionItemKind, workspace } from 'vscode';
-import { I18nKeyDetector } from './i18nKeyDetector';
+import { KeyDetector } from './keyDetector';
 import { i18nResolver } from './extension';
 import { logger } from './logger';
 
 export class I18nCompletionProvider implements CompletionItemProvider {
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext): ProviderResult<CompletionItem[] | CompletionList> {
-        let range = I18nKeyDetector.getRangeOfI18nKeyAtPosition(position, document);
-        let i18nKey = I18nKeyDetector.getI18nKeyAtRangeFromDocument(range, document);
+        let range = KeyDetector.getRangeOfI18nKeyAtPosition(position, document);
+        let i18nKey = KeyDetector.getI18nKeyAtRangeFromDocument(range, document);
         let keyPrefix = workspace.getWorkspaceFolder(document.uri).name + "." + i18nResolver.getDefaultLocaleKey(document.uri) + ".";
         logger.debug('provideCompletionItems', 'range:', range, 'i18nkey', i18nKey, 'keyPrefix', keyPrefix);
 
-        if (I18nKeyDetector.isRelativeKey(i18nKey)) {
-            keyPrefix += I18nKeyDetector.getRelativeKeyPart(document.fileName);
+        if (KeyDetector.isRelativeKey(i18nKey)) {
+            keyPrefix += KeyDetector.getRelativeKeyPart(document.fileName);
         }
 
         return this.buildCompletionItemList(keyPrefix, i18nKey);

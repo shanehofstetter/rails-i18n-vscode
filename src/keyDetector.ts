@@ -3,7 +3,7 @@ import { Position, Range, TextDocument } from 'vscode';
 /**
  * Provides functions to detect and transform i18n keys
  */
-export class I18nKeyDetector {
+export class KeyDetector {
 
     /**
      * check if i18n key is valid
