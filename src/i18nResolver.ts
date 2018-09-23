@@ -5,19 +5,27 @@ import { DefaultLocaleDetector } from './defaultLocaleDetector';
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
 import { i18nTree } from "./i18nTree";
+import { EventEmitter } from "events";
 
 export class I18nResolver implements vscode.Disposable {
 
     private fileSystemWatcher;
     private readonly yamlPattern = 'config/locales/**/*.yml';
     private i18nLocaleDetector: DefaultLocaleDetector;
+    private readonly onDidLoadEmitter: EventEmitter = new EventEmitter();
 
     public load(): Thenable<any> {
         this.init();
         return this.loadYamlFiles().then(_ => {
             this.registerFileWatcher();
-            return this.loadDefaultLocale();
+            return this.loadDefaultLocale().then(() => {
+                this.onDidLoadEmitter.emit('didLoad');
+            });
         });
+    }
+
+    public onDidLoad(listener: () => any) {
+        this.onDidLoadEmitter.addListener('didLoad', listener);
     }
 
     private init(): void {
@@ -42,7 +50,7 @@ export class I18nResolver implements vscode.Disposable {
 
         return workspace.findFiles(this.yamlPattern).then(files => {
             files = files.filter(file => workspace.getWorkspaceFolder(file).uri.path === workspaceFolder.uri.path)
-            
+
             if (files.length === 0) {
                 logger.warn(`no locale files in project dir found, ${workspaceFolder.uri.path} is probably not a rails project.`);
                 return files;

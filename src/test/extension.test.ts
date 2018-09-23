@@ -24,7 +24,7 @@ describe("Extension", () => {
     it('does load translations on activation and returns translation for existing key', (done) => {
         let viewFile = Uri.file(path.join(__dirname, 'app', 'views', 'blog', 'show.html.haml'));
         workspace.openTextDocument(viewFile).then(() => {
-            setTimeout(function () {
+            i18nResolver.onDidLoad(() => {
                 Object.keys(translations).forEach(locale => {
                     assert.equal(i18nResolver.getTranslationForKey('hello', locale, viewFile), translations[locale].hello);
                     assert.equal(i18nTree.lookupKey(`test.${locale}.hello`), translations[locale].hello);
@@ -33,7 +33,7 @@ describe("Extension", () => {
                 });
                 assert.equal(i18nTree.translationsForLocaleExist('it', 'test'), false);
                 done();
-            }, 500);
+            });
         });
     });
 });
