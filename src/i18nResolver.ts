@@ -1,7 +1,7 @@
 import { load } from "js-yaml";
 import * as vscode from 'vscode';
 import { workspace, Uri, window } from 'vscode';
-import { DefaultLocaleDetector } from './defaultLocaleDetector';
+import { DefaultLocaleDetector, LocaleDefaults } from './defaultLocaleDetector';
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
 import { i18nTree } from "./i18nTree";
@@ -96,10 +96,11 @@ export class I18nResolver implements vscode.Disposable {
         });
     }
 
-    private loadDefaultLocale(): Thenable<any> {
+    private loadDefaultLocale(): Thenable<LocaleDefaults> {
         this.i18nLocaleDetector = new DefaultLocaleDetector();
         return this.i18nLocaleDetector.detectDefaultLocaleWithFallback(i18nTree).then(locales => {
             logger.info('default locales:', locales);
+            return locales;
         }, error => {
             logger.error(error);
         });
@@ -113,7 +114,7 @@ export class I18nResolver implements vscode.Disposable {
      * resolve text value for i18n key in default locale
      * @param key i18n key (e.g. "hello.world")
      */
-    public getTranslationForKey(key: string, locale?: string, sourceUri?: Uri): any {
+    public getTranslationForKey(key: string, locale?: string, sourceUri?: Uri): string | null {
         if (!locale) {
             locale = this.i18nLocaleDetector.getDefaultLocaleForUri(window.activeTextEditor.document.uri);
         }
