@@ -24,7 +24,9 @@ describe("Extension", () => {
         fs.copySync(fixturePath, __dirname);
     });
 
-    it('does load translations on activation and returns translation for existing key', (done) => {
+    it('does load translations on activation and returns translation for existing key', function (done) {
+        this.timeout(10000);
+
         let viewFile = Uri.file(path.join(__dirname, 'app', 'views', 'blog', 'show.html.haml'));
         workspace.openTextDocument(viewFile).then(() => {
             i18nResolver.onDidLoad(() => {
