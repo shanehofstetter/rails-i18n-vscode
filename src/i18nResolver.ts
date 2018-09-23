@@ -17,8 +17,10 @@ export class I18nResolver implements vscode.Disposable {
     public load(): Thenable<any> {
         this.init();
         return this.loadYamlFiles().then(_ => {
+            logger.debug('yaml files loaded');
             this.registerFileWatcher();
             return this.loadDefaultLocale().then(() => {
+                logger.debug('finished loading.');
                 this.onDidLoadEmitter.emit('didLoad');
             });
         });
@@ -29,6 +31,7 @@ export class I18nResolver implements vscode.Disposable {
     }
 
     private init(): void {
+        logger.debug('init');
         i18nTree.init();
     }
 
