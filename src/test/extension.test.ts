@@ -4,6 +4,7 @@ import * as assert from 'assert';
 import { i18nResolver } from "../extension";
 import * as fs from 'fs-extra';
 import { i18nTree } from "../i18nTree";
+import logger = require('../logger');
 
 const fixturePath = path.join(__dirname, "..", "..", "src", "test", 'fixtures');
 const translations = {
@@ -16,6 +17,8 @@ const translations = {
 }
 
 describe("Extension", () => {
+    logger.logLevel = logger.LogLevel.Debug;
+
     beforeEach(() => {
         workspace.updateWorkspaceFolders(0, 0, { uri: Uri.file(path.join(__dirname)), name: 'test' });
         fs.copySync(fixturePath, __dirname);
