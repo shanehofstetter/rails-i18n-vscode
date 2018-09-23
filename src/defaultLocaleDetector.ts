@@ -2,6 +2,7 @@ import { workspace, Uri, WorkspaceFolder } from "vscode";
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
 import { RailsConfigFileParser } from "./railsConfigFileParser";
+import { I18nTree } from "./i18nTree";
 
 type WorkspaceFolderConfig = { workspaceFolderName: string; locale: string; };
 export type LocaleDefaults = { [workspaceFolderName: string]: string };
@@ -14,11 +15,8 @@ export class DefaultLocaleDetector {
      * detect configured i18n default locale with fallback to one of the available locales
      * @param i18nTree translations tree to get the fallback from
      */
-    public detectDefaultLocaleWithFallback(i18nTree: object): Thenable<LocaleDefaults> {
-        // TODO: refactor, parameter should be a custom i18ntree-wrapper which provides a method to get the 
-        // relevant workspacefolders as vscode.WorkspaceFolder objects
-        const workspaceFolderNames = Object.keys(i18nTree);
-        return this.detectDefaultLocales(workspaceFolderNames).then(locales => {
+    public detectDefaultLocaleWithFallback(i18nTree: I18nTree): Thenable<LocaleDefaults> {
+        return this.detectDefaultLocales(i18nTree.getWorkspaceFolderNames()).then(locales => {
             locales.forEach(workspaceFolderConfig => {
                 let locale = workspaceFolderConfig.locale;
 
@@ -38,15 +36,15 @@ export class DefaultLocaleDetector {
         return this.workspaceFolderDefaults[workspace.getWorkspaceFolder(uri).name];
     }
 
-    private getFallbackLocaleIfNotAvailable(i18nTree: object, locale: string, workspaceFolderConfig: WorkspaceFolderConfig): string {
+    private getFallbackLocaleIfNotAvailable(i18nTree: I18nTree, locale: string, workspaceFolderConfig: WorkspaceFolderConfig): string {
         if (i18nTree) {
-            if (locale && !this.translationsForLocaleExistInTree(locale, i18nTree, workspaceFolderConfig.workspaceFolderName)) {
-                let newDefault = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
+            if (locale && !i18nTree.translationsForLocaleExist(locale, workspaceFolderConfig.workspaceFolderName)) {
+                let newDefault = i18nTree.getFallbackLocale(workspaceFolderConfig.workspaceFolderName);
                 logger.warn(`no translations found for default locale '${locale}', using '${newDefault}' instead.`, 'workspace dir:', workspaceFolderConfig.workspaceFolderName);
                 locale = newDefault;
             }
             if (!locale) {
-                locale = this.getFallbackLocaleFromTree(i18nTree, workspaceFolderConfig.workspaceFolderName);
+                locale = i18nTree.getFallbackLocale(workspaceFolderConfig.workspaceFolderName);
                 logger.info('using fallback locale:', locale);
             }
         }
@@ -81,19 +79,5 @@ export class DefaultLocaleDetector {
                 });
             })
         }))
-    }
-
-    private translationsForLocaleExistInTree(locale: string, tree: object, workspaceFolderName: string): boolean {
-        // TODO: refactor, move this into i18ntree wrapper class (to be implemented)
-        return !!Object.keys(tree[workspaceFolderName]).find(key => key === locale);
-    }
-
-    private getFallbackLocaleFromTree(tree: object, workspaceFolderName: string): string {
-        // TODO: refactor, move this into i18ntree wrapper class (to be implemented)
-        const workspaceTranslations = tree[workspaceFolderName];
-        if (workspaceTranslations) {
-            return Object.keys(workspaceTranslations)[0];
-        }
-        return 'en';
     }
 }

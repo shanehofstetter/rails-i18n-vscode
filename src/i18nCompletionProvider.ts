@@ -2,6 +2,7 @@ import { CancellationToken, CompletionContext, CompletionItem, CompletionItemPro
 import { KeyDetector } from './keyDetector';
 import { i18nResolver } from './extension';
 import { logger } from './logger';
+import { i18nTree } from './i18nTree';
 
 export class I18nCompletionProvider implements CompletionItemProvider {
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext): ProviderResult<CompletionItem[] | CompletionList> {
@@ -19,7 +20,7 @@ export class I18nCompletionProvider implements CompletionItemProvider {
 
     private buildCompletionItemList(keyPrefix, i18nKey): CompletionItem[] {
         let fullKey = keyPrefix + i18nKey;
-        let filteredKeys = this.filterLookupMap(fullKey);
+        let filteredKeys = i18nTree.getKeysStartingWith(fullKey);
         logger.debug('buildCompletionItemList', 'filteredKeys:', filteredKeys);
         return this.transformFilterResultIntoCompletionItemList(filteredKeys, keyPrefix, i18nKey);
     }
@@ -38,13 +39,7 @@ export class I18nCompletionProvider implements CompletionItemProvider {
         // current word gets replaced, so we need to provide the current full keypart that is being typed 
         completionItem.insertText = relevantKey.substring(i18nKeyToComplete.lastIndexOf(".") + 1);
         // provide the translation as additional info
-        completionItem.detail = i18nResolver.getLookupMap()[filteredKey];
+        completionItem.detail = i18nTree.lookupKey(filteredKey);
         return completionItem;
-    }
-
-    private filterLookupMap(fullKey: string): string[] {
-        return Object.keys(i18nResolver.getLookupMap()).filter(lookupKey => {
-            return lookupKey.startsWith(fullKey);
-        });
     }
 }
