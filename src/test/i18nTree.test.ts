@@ -1,8 +1,18 @@
 import * as assert from 'assert';
 import { I18nTree } from '../i18nTree';
+import { WorkspaceFolder, Uri } from 'vscode';
 
 describe("I18nTree", () => {
-    let i18nTree: I18nTree;
+    const blogWorkspaceFolder: WorkspaceFolder = {
+        name: 'blog',
+        uri: Uri.file('/blog'),
+        index: 0
+    }
+    const xyWorkspaceFolder: WorkspaceFolder = {
+        name: 'xy',
+        uri: Uri.file('/xy'),
+        index: 1
+    }
 
     beforeEach(() => {
         this.i18nTree = new I18nTree();
@@ -11,17 +21,17 @@ describe("I18nTree", () => {
     describe("init", () => {
         context("when translations loaded", () => {
             beforeEach(() => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog")
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
             });
 
             it("resets translations", () => {
                 assert.equal(
-                    this.i18nTree.lookupKey('blog.en.hello'),
+                    this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                     'hi'
                 );
                 this.i18nTree.init();
                 assert.equal(
-                    this.i18nTree.lookupKey('blog.en.hello'),
+                    this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                     null
                 );
             });
@@ -32,18 +42,18 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('does not remove existing translations', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog")
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
             assert.equal(
-                this.i18nTree.lookupKey('blog.en.hello'),
+                this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                 'hi'
             );
-            this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, "blog")
+            this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, blogWorkspaceFolder)
             assert.equal(
-                this.i18nTree.lookupKey('blog.en.hello'),
+                this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                 'hi'
             );
             assert.equal(
-                this.i18nTree.lookupKey('blog.en.bye'),
+                this.i18nTree.lookupKey('en.bye', blogWorkspaceFolder),
                 'bye'
             );
         });
@@ -53,12 +63,12 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('returns keys which begin with substring', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi', help: 'help', bye: 'bye' } }, "blog")
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi', help: 'help', bye: 'bye' } }, blogWorkspaceFolder)
             assert.deepStrictEqual(
-                this.i18nTree.getKeysStartingWith('blog.en.he'),
+                this.i18nTree.getKeysStartingWith('en.he', blogWorkspaceFolder),
                 [
-                    "blog.en.hello",
-                    "blog.en.help"
+                    "en.hello",
+                    "en.help"
                 ]
             );
         });
@@ -69,20 +79,20 @@ describe("I18nTree", () => {
 
         context('when translations exist', () => {
             it('returns true', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog")
-                assert.equal(this.i18nTree.translationsForLocaleExist('en', 'blog'), true);
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                assert.equal(this.i18nTree.translationsForLocaleExist('en', blogWorkspaceFolder), true);
             });
         });
 
         context('when no translations exist', () => {
             it('returns false if no translations for workspace folder available', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog")
-                assert.equal(this.i18nTree.translationsForLocaleExist('en', 'xy'), false);
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                assert.equal(this.i18nTree.translationsForLocaleExist('en', xyWorkspaceFolder), false);
             });
 
             it('returns false if no translations for workspace folder and locale available', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog")
-                assert.equal(this.i18nTree.translationsForLocaleExist('fr', 'blog'), false);
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                assert.equal(this.i18nTree.translationsForLocaleExist('fr', blogWorkspaceFolder), false);
             });
         });
     });
@@ -91,18 +101,18 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('returns first locale of workspacefolder translations', () => {
-            this.i18nTree.mergeIntoI18nTree({ fr: { hello: 'hi' }, it: { hello: 'hi' } }, "blog")
-            assert.equal(this.i18nTree.getFallbackLocale('blog'), 'fr');
+            this.i18nTree.mergeIntoI18nTree({ fr: { hello: 'hi' }, it: { hello: 'hi' } }, blogWorkspaceFolder)
+            assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'fr');
         });
 
         it('returns en if no translations for workspace folder loaded', () => {
-            this.i18nTree.mergeIntoI18nTree({}, "blog")
-            assert.equal(this.i18nTree.getFallbackLocale('blog'), 'en');
+            this.i18nTree.mergeIntoI18nTree({}, blogWorkspaceFolder)
+            assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'en');
         });
 
         it('returns en if workspace folder not present in translations', () => {
-            this.i18nTree.mergeIntoI18nTree({}, "xy")
-            assert.equal(this.i18nTree.getFallbackLocale('blog'), 'en');
+            this.i18nTree.mergeIntoI18nTree({}, xyWorkspaceFolder)
+            assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'en');
         });
     });
 
@@ -111,29 +121,29 @@ describe("I18nTree", () => {
 
         context('with translations for workspace', () => {
             it('returns string translation', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog");
-                assert.equal(this.i18nTree.getTranslation('hello', 'en', 'blog'), 'hi');
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+                assert.equal(this.i18nTree.getTranslation('hello', 'en', blogWorkspaceFolder), 'hi');
             });
 
             it('returns multiresult', () => {
                 this.i18nTree.mergeIntoI18nTree(
                     { en: { greetings: { hi: 'hi', hello: 'hello' } } },
-                    "blog");
-                assert.equal(this.i18nTree.getTranslation('greetings', 'en', 'blog'),
+                    blogWorkspaceFolder);
+                assert.equal(this.i18nTree.getTranslation('greetings', 'en', blogWorkspaceFolder),
                     'hi: hi\nhello: hello');
             });
         });
 
         context('with non-existent translations workspace', () => {
             it('returns undefined', () => {
-                assert.equal(this.i18nTree.getTranslation('hi', 'en', 'blog'),
+                assert.equal(this.i18nTree.getTranslation('hi', 'en', blogWorkspaceFolder),
                     undefined);
             });
         });
 
         context('when given key is null or empty', () => {
             it('returns null', () => {
-                assert.equal(this.i18nTree.getTranslation(null, 'en', 'blog'),
+                assert.equal(this.i18nTree.getTranslation(null, 'en', blogWorkspaceFolder),
                     null);
             });
         })
@@ -141,26 +151,26 @@ describe("I18nTree", () => {
 
     describe('getWorkspaceFolderNames', () => {
         it('returns list of workspace folder names', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog");
-            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolderNames(), ['blog']);
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog");
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "xy");
-            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolderNames(), ['blog', 'xy']);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolders(), [blogWorkspaceFolder]);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, xyWorkspaceFolder);
+            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolders(), [blogWorkspaceFolder, xyWorkspaceFolder]);
         });
 
         it('returns empty array if no translations exist', () => {
-            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolderNames(), []);
+            assert.deepStrictEqual(this.i18nTree.getWorkspaceFolders(), []);
         });
     });
 
     describe('lookupKey', () => {
         it('returns translation for given full key', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, "blog");
-            assert.equal(this.i18nTree.lookupKey('blog.en.hello'), 'hi');
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+            assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), 'hi');
         });
 
         it('returns undefined if key does not exist', () => {
-            assert.equal(this.i18nTree.lookupKey('blog.en.hello'), undefined);
+            assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), undefined);
         });
     });
 });

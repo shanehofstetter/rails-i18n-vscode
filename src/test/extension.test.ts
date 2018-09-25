@@ -1,4 +1,4 @@
-import { workspace, Uri, ExtensionContext } from "vscode";
+import { workspace, Uri, ExtensionContext, WorkspaceFolder } from "vscode";
 import * as path from 'path';
 import * as assert from 'assert';
 import { i18nResolver, activate } from "../extension";
@@ -15,10 +15,16 @@ const translations = {
     }
 }
 
+const workspaceFolder: WorkspaceFolder = {
+    name: 'test',
+    uri: Uri.file(path.join(__dirname)),
+    index: 0
+}
+
 describe("Extension", () => {
     beforeEach(() => {
         fs.copySync(fixturePath, __dirname);
-        workspace.updateWorkspaceFolders(0, 0, { uri: Uri.file(path.join(__dirname)), name: 'test' });
+        workspace.updateWorkspaceFolders(0, 0, workspaceFolder);
     });
 
     describe('activation', () => {
@@ -40,14 +46,18 @@ describe("Extension", () => {
             let viewFile = Uri.file(path.join(__dirname, 'app', 'views', 'blog', 'show.html.haml'));
             workspace.openTextDocument(viewFile).then(() => {
                 i18nResolver.onDidLoad(() => {
-                    Object.keys(translations).forEach(locale => {
-                        assert.equal(i18nResolver.getTranslationForKey('hello', locale, viewFile), translations[locale].hello);
-                        assert.equal(i18nTree.lookupKey(`test.${locale}.hello`), translations[locale].hello);
-                        assert.equal(i18nTree.getTranslation('hello', locale, 'test'), translations[locale].hello);
-                        assert.equal(i18nTree.translationsForLocaleExist(locale, 'test'), true);
-                    });
-                    assert.equal(i18nTree.translationsForLocaleExist('it', 'test'), false);
-                    done();
+                    try {
+                        Object.keys(translations).forEach(locale => {
+                            assert.equal(i18nResolver.getTranslationForKey('hello', locale, viewFile), translations[locale].hello);
+                            assert.equal(i18nTree.lookupKey(`${locale}.hello`, workspaceFolder), translations[locale].hello);
+                            assert.equal(i18nTree.getTranslation('hello', locale, workspaceFolder), translations[locale].hello);
+                            assert.equal(i18nTree.translationsForLocaleExist(locale, workspaceFolder), true);
+                        });
+                        assert.equal(i18nTree.translationsForLocaleExist('it', workspaceFolder), false);
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
                 });
             });
         });

@@ -4,7 +4,7 @@ import { workspace, Uri, window } from 'vscode';
 import { DefaultLocaleDetector, LocaleDefaults } from './defaultLocaleDetector';
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
-import { i18nTree } from "./i18nTree";
+import { i18nTree, Translation } from "./i18nTree";
 import { EventEmitter } from "events";
 
 export class I18nResolver implements vscode.Disposable {
@@ -89,7 +89,7 @@ export class I18nResolver implements vscode.Disposable {
                 if (!workspaceFolder) {
                     workspaceFolder = workspace.getWorkspaceFolder(file);
                 }
-                i18nTree.mergeIntoI18nTree(load(document.getText()), workspaceFolder.name);
+                i18nTree.mergeIntoI18nTree(<Translation>load(document.getText()), workspaceFolder);
             } catch (error) {
                 logger.error('loadDocumentIntoMap', file.path, error.message);
             }
@@ -123,7 +123,7 @@ export class I18nResolver implements vscode.Disposable {
             sourceUri = window.activeTextEditor.document.uri;
         }
 
-        return i18nTree.getTranslation(key, locale, workspace.getWorkspaceFolder(sourceUri).name);
+        return i18nTree.getTranslation(key, locale, workspace.getWorkspaceFolder(sourceUri));
     }
 
     public dispose() {
