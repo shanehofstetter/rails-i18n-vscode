@@ -28,7 +28,6 @@ Rails I18n helper for Visual Studio Code
 
 ## Known Issues
 
-- when removing keys from yaml files, the removed keys are still suggested in autocompletion
 - RVM not supported
 
 ## Release Notes

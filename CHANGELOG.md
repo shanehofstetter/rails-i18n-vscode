@@ -1,5 +1,7 @@
 # Change Log
 
+- keep track of loaded translation files, removing deleted keys from memory
+
 ## 0.0.6
 - use fallback strategies when rails calls fail
 - reload translations when workspace changes
