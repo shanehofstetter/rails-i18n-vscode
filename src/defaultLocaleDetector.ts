@@ -33,6 +33,7 @@ export class DefaultLocaleDetector {
      * @param uri file uri
      */
     public getDefaultLocaleForUri(uri: Uri): string {
+        logger.debug('getDefaultLocaleForUri', uri, 'workspaceFolderDefaults', this.workspaceFolderDefaults);
         return this.workspaceFolderDefaults[workspace.getWorkspaceFolder(uri).uri.path];
     }
 
