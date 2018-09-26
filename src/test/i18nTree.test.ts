@@ -57,6 +57,18 @@ describe("I18nTree", () => {
                 'bye'
             );
         });
+
+        context('when sourceFile is specified', () => {
+            it('does not keep no longer existing keys', () => {
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder, Uri.file('/file/a'));
+                this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, blogWorkspaceFolder, Uri.file('/file/b'));
+                assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), 'hi');
+                assert.equal(this.i18nTree.lookupKey('en.bye', blogWorkspaceFolder), 'bye');
+                this.i18nTree.mergeIntoI18nTree({ en: { ciao: 'ciao' } }, blogWorkspaceFolder, Uri.file('/file/a'));
+                assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), undefined);
+                assert.equal(this.i18nTree.lookupKey('en.ciao', blogWorkspaceFolder), 'ciao');
+            });
+        });
     });
 
     describe("getKeysStartingWith", () => {

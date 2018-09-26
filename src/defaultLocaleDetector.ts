@@ -63,7 +63,6 @@ export class DefaultLocaleDetector {
     }
 
     private detectDefaultLocales(workspaceFolders: WorkspaceFolder[]): Thenable<WorkspaceFolderConfig[]> {
-        // TODO: refactor, parameter should be a list of vscode.WorkspaceFolder objects
         return Promise.all(workspaceFolders.map(workspaceFolder => {
             return this.detectDefaultLocale(workspaceFolder).then(locale => {
                 return Promise.resolve({

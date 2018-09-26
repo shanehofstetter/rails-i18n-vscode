@@ -89,7 +89,7 @@ export class I18nResolver implements vscode.Disposable {
                 if (!workspaceFolder) {
                     workspaceFolder = workspace.getWorkspaceFolder(file);
                 }
-                i18nTree.mergeIntoI18nTree(<Translation>load(document.getText()), workspaceFolder);
+                i18nTree.mergeIntoI18nTree(<Translation>load(document.getText()), workspaceFolder, file);
             } catch (error) {
                 logger.error('loadDocumentIntoMap', file.path, error.message);
             }

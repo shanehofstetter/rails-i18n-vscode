@@ -17,12 +17,16 @@ export class WorkspaceFolderTranslation {
     }
 
     public mergeIntoI18nTree(i18nTreePart: Translation, sourceFile?: Uri) {
-        // TODO: save i18nTreePart as TranslationPart (override if already exists), then merge all parts again
-        this.translation = merge.recursive(
-            false,
-            this.translation,
-            i18nTreePart
-        );
+        this.addTranslationPart(i18nTreePart, sourceFile || null);
+        this.translation = {};
+        this.translationParts.forEach((translationPart) => {
+            this.translation = merge.recursive(
+                false,
+                this.translation,
+                translationPart.translations
+            );
+        });
+
         this.lookupMap = new LookupMapGenerator(this.translation).generateLookupMap();
     }
 
@@ -72,6 +76,14 @@ export class WorkspaceFolderTranslation {
 
     public lookupKey(key: string): any {
         return this.lookupMap[key];
+    }
+
+    private addTranslationPart(translation: Translation, sourceFile: Uri) {
+        const translationPart = { translations: translation, file: sourceFile };
+        if (this.translationParts.length > 0 && translationPart.file) {
+            this.translationParts = this.translationParts.filter(tp => tp.file && tp.file.path !== translationPart.file.path);
+        }
+        this.translationParts.push(translationPart);
     }
 
     private makeKeyParts(key: string, locale: string): string[] {
