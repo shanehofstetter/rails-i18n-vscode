@@ -1,5 +1,6 @@
 # Change Log
 
+- add Mocha tests
 - keep track of loaded translation files, removing deleted keys from memory
 
 ## 0.0.6
