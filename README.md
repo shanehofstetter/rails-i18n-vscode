@@ -27,6 +27,8 @@ Rails I18n helper for Visual Studio Code
 - evaluates and parses yaml files configured in `I18n.load_path` (turned off per default, turn it on by setting `railsI18n.loadAllTranslations` to `true`)
 - provides definition for i18n keys (Command '`Go To Definition`'  (<kbd>F12</kbd> or <kbd>⌘</kbd>+<kbd>↓</kbd>))
 
+![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/goto-definition.gif)
+
 ## Known Issues
 
 - RVM not supported
