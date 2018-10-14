@@ -39,7 +39,7 @@ describe("Extension", () => {
 
         beforeEach(() => {
             activate(mockContext);
-            assert.equal(mockContext.subscriptions.length, 4);
+            assert.equal(mockContext.subscriptions.length, 5);
         });
 
         it('does load translations and returns translation for existing key', function (done) {

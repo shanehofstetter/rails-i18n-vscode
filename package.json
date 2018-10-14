@@ -73,10 +73,9 @@
         "fs-extra": "^7.0.0"
     },
     "dependencies": {
-        "@types/js-yaml": "^3.11.1",
         "execa": "^0.11.0",
         "flat": "^4.0.0",
-        "js-yaml": "^3.12.0",
-        "merge": "^1.2.0"
+        "merge": "^1.2.0",
+        "yaml": "^1.0.0"
     }
 }

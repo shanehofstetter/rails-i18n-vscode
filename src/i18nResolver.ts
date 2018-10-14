@@ -1,4 +1,4 @@
-import { load } from "js-yaml";
+import YAML from "yaml";
 import * as vscode from 'vscode';
 import { workspace, Uri, window } from 'vscode';
 import { DefaultLocaleDetector, LocaleDefaults } from './defaultLocaleDetector';
@@ -89,7 +89,7 @@ export class I18nResolver implements vscode.Disposable {
                 if (!workspaceFolder) {
                     workspaceFolder = workspace.getWorkspaceFolder(file);
                 }
-                i18nTree.mergeIntoI18nTree(<Translation>load(document.getText()), workspaceFolder, file);
+                i18nTree.mergeIntoI18nTree(<Translation>YAML.parse(document.getText()), workspaceFolder, file);
             } catch (error) {
                 logger.error('loadDocumentIntoMap', file.path, error.message);
             }

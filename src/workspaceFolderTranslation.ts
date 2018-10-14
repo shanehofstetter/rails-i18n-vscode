@@ -4,7 +4,7 @@ import { LookupMapGenerator } from "./lookupMapGenerator";
 import { logger } from "./logger";
 import * as merge from "merge";
 
-type TranslationPart = { file: Uri, translations: Translation }
+export type TranslationPart = { file: Uri, translations: Translation }
 
 export class WorkspaceFolderTranslation {
     public workspaceFolder: WorkspaceFolder;
@@ -65,13 +65,25 @@ export class WorkspaceFolderTranslation {
             return simpleLookupResult;
         }
 
-        let lookupResult = this.traverseThroughMap(keyParts);
+        let lookupResult = this.traverseTranslation(keyParts, this.translation);
         logger.debug('key:', key, 'fullKey:', fullKey, 'lookupResult:', lookupResult);
         if (lookupResult !== null && typeof lookupResult === "object") {
             return this.transformMultiResultIntoText(lookupResult);
         }
 
         return lookupResult;
+    }
+
+    /**
+     * find the translation part containing given key (first match is returned) 
+     * @param key i18n key
+     * @param locale locale key
+     */
+    public getTranslationPart(key: string, locale: string): TranslationPart {
+        return this.translationParts.find(translationPart => {
+            const result = this.traverseTranslation(this.makeKeyParts(key, locale), translationPart.translations);
+            return typeof result === "string";
+        });
     }
 
     public lookupKey(key: string): any {
@@ -93,8 +105,8 @@ export class WorkspaceFolderTranslation {
         return keys;
     }
 
-    private traverseThroughMap(keyParts: string[]): string | Translation {
-        let result: any = this.translation;
+    private traverseTranslation(keyParts: string[], translation: Translation): string | Translation {
+        let result: any = translation;
         keyParts.forEach(keyPart => {
             if (result !== undefined) {
                 result = result[keyPart];

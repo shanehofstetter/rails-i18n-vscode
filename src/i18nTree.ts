@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 import { Uri, WorkspaceFolder } from "vscode";
-import { WorkspaceFolderTranslation } from "./workspaceFolderTranslation";
+import { WorkspaceFolderTranslation, TranslationPart } from "./workspaceFolderTranslation";
 
 export type Translation = { [key: string]: string | Translation }
 export type LookupMap = { [key: string]: string }
@@ -35,6 +35,11 @@ export class I18nTree {
     public getTranslation(key: string, locale: string, workspaceFolder: WorkspaceFolder): any {
         logger.debug('getTranslation', 'key', key, 'locale', locale, 'workspaceFolder', workspaceFolder);
         return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getTranslation(key, locale);
+    }
+
+    public getTranslationPart(key: string, locale: string, workspaceFolder: WorkspaceFolder): TranslationPart {
+        logger.debug('getTranslationPart', 'key', key, 'locale', locale, 'workspaceFolder', workspaceFolder);
+        return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getTranslationPart(key, locale);
     }
 
     public getWorkspaceFolders(): WorkspaceFolder[] {
