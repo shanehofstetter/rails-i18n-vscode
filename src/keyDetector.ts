@@ -1,4 +1,5 @@
 import { Position, Range, TextDocument } from 'vscode';
+import { logger } from './logger';
 
 /**
  * Provides functions to detect and transform i18n keys
@@ -70,5 +71,19 @@ export class KeyDetector {
 
     public static isRelativeKey(key: string): boolean {
         return key.startsWith(".");
+    }
+
+    public static getAbsoluteKeyFromPositionInDocument(position: Position, document: TextDocument): { key: string, range: Range } | null {
+        let range = KeyDetector.getRangeOfI18nKeyAtPosition(position, document);
+        if (!range) {
+            return null;
+        }
+        let i18nKey = KeyDetector.getI18nKeyAtRangeFromDocument(range, document);
+        logger.debug('getAbsoluteKeyFromPositionInDocument', { i18nKey, range });
+        if (!KeyDetector.isValidI18nKey(i18nKey)) {
+            return null;
+        }
+
+        return { key: KeyDetector.makeAbsoluteKey(i18nKey, document.fileName), range };
     }
 }
