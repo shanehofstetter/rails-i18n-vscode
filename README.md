@@ -25,7 +25,7 @@ Rails I18n helper for Visual Studio Code
 
 - supports multiple workspace folders
 - evaluates and parses yaml files configured in `I18n.load_path` (turned off per default, turn it on by setting `railsI18n.loadAllTranslations` to `true`)
-- provides definition for i18n keys (Command '`Go To Definition`'  (<kbd>F12</kbd>))
+- provides definition for i18n keys (Command '`Go To Definition`'  (<kbd>F12</kbd> or <kbd>⌘</kbd>+<kbd>↓</kbd>))
 
 ## Known Issues
 
