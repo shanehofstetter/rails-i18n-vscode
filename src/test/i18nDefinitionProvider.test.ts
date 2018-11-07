@@ -18,6 +18,13 @@ const yamlDoubleQuoted = `
 en:
     hello: "hello"`;
 
+const yamlFlatKeys = `
+en:
+    hello.world: "hello"`;
+
+const yamlAllFlatKeys = `
+en.hello.world: "hello"`;
+
 const incompleteYaml = `
 en:
     someotherkey: hello`;
@@ -58,6 +65,20 @@ describe("Definition Provider", () => {
                 assert.deepEqual(
                     i18nDefinitionProvider.findKeyValueRangeInYAML(yamlDoubleQuoted, 'hello', 'en'),
                     [16, 23]
+                );
+            });
+
+            it("finds value with flat key", () => {
+                assert.deepEqual(
+                    i18nDefinitionProvider.findKeyValueRangeInYAML(yamlFlatKeys, 'hello.world', 'en'),
+                    [22, 29]
+                );
+            });
+
+            it("finds value with all flat keys", () => {
+                assert.deepEqual(
+                    i18nDefinitionProvider.findKeyValueRangeInYAML(yamlAllFlatKeys, 'hello.world', 'en'),
+                    [17, 24]
                 );
             });
         });
