@@ -66,19 +66,22 @@ export class I18nDefinitionProvider implements DefinitionProvider {
 
         let yamlPairs = yamlDocument.contents.items;
         if (!yamlPairs) {
+            logger.warn('yamlDocument does not have any items');
             return null;
         }
-        let yamlPair = yamlPairs.find(item => item.stringKey === locale);
-        if (!yamlPair) {
-            return null;
-        }
-        yamlPairs = yamlPair.value.items;
+
+        keyParts.unshift(locale);
 
         for (let i = 0; i < keyParts.length; i++) {
             const keyPart = keyParts[i];
-            const yamlPair = yamlPairs.find(item => item.stringKey === keyPart);
+            const flatKey: string = keyParts.slice(i).join('.');
+            let yamlPair = yamlPairs.find(item => item.stringKey === flatKey);
             if (!yamlPair) {
-                return null;
+                yamlPair = yamlPairs.find(item => item.stringKey === keyPart);
+                if (!yamlPair) {
+                    logger.debug('key could not be located in yaml document');
+                    return null;
+                }
             }
             let value = yamlPair.value;
             logger.debug('current value:', value);
@@ -88,6 +91,7 @@ export class I18nDefinitionProvider implements DefinitionProvider {
             } else if (value.items) {
                 yamlPairs = value.items;
             } else {
+                logger.debug('unknown value object (complex type with no child items)', { value });
                 return null;
             }
         }

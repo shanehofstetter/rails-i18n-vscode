@@ -107,11 +107,24 @@ export class WorkspaceFolderTranslation {
 
     private traverseTranslation(keyParts: string[], translation: Translation): string | Translation {
         let result: any = translation;
-        keyParts.forEach(keyPart => {
+        for (let index = 0; index < keyParts.length; index++) {
+            const keyPart: string = keyParts[index];
             if (result !== undefined) {
-                result = result[keyPart];
+                const flatKey: string = keyParts.slice(index).join('.');
+                logger.debug('traverseTranslation', { flatKey, index });
+                if (flatKey in result) {
+                    result = result[flatKey];
+                } else if (keyPart in result) {
+                    result = result[keyPart];
+                } else {
+                    result = undefined;
+                }
             }
-        });
+            if (typeof result === 'string') {
+                break;
+            }
+        }
+
         return result;
     }
 
