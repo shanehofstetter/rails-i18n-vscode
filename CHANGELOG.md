@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.9
+- fix definition provider for flat (dot-separated) yaml keys
+
 ## 0.0.8
 - provide key definition
 
