@@ -21,7 +21,7 @@ export class WorkspaceFolderTranslation {
         this.translation = {};
         this.translationParts.forEach((translationPart) => {
             this.translation = merge.recursive(
-                false,
+                true,
                 this.translation,
                 translationPart.translations
             );
