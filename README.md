@@ -38,3 +38,4 @@ Rails I18n helper for Visual Studio Code
 ## Planned Features
 - [ ] add a setting which when enabled shows translations in all available locales on hover
 - [ ] go-to-definition does create key in yaml file if it does not already exist 
+- [ ] copy dot-separated translation keys into clipboard from yaml file
