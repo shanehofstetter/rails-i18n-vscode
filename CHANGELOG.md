@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.10
+- fix translation loading, clone merged parts
+
 ## 0.0.9
 - fix definition provider for flat (dot-separated) yaml keys
 
