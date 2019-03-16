@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.0 
+- updated depencies
+- support ruby files
+
 ## 0.0.10
 - fix translation loading, clone merged parts
 
