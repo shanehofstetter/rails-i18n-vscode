@@ -24,7 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
     const documentFilters = [
         { language: 'haml', scheme: 'file' },
         { language: 'erb', scheme: 'file' },
-        { language: 'slim', scheme: 'file' }
+        { language: 'slim', scheme: 'file' },
+        { language: 'ruby', scheme: 'file' },
     ];
 
     context.subscriptions.push(vscode.languages.registerHoverProvider(documentFilters, new I18nHoverProvider()));
