@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(i18nResolver);
     context.subscriptions.push(workspace.onDidChangeWorkspaceFolders(e => loadWithProgress()));
 
-    const fileTypes = vscode.workspace.getConfiguration('railsI18n').get<string>('languageIdentifiers').split(',');
+    const fileTypes = vscode.workspace.getConfiguration('railsI18n').get<Array<string>>('languageIdentifiers');
     const documentFilters = fileTypes.map(fileType => ({ language: fileType, scheme: 'file' }));
 
     context.subscriptions.push(vscode.languages.registerHoverProvider(documentFilters, new I18nHoverProvider()));

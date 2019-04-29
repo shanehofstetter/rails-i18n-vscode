@@ -53,9 +53,18 @@
                     "description": "load all translation files configured in I18n.load_path"
                 },
                 "railsI18n.languageIdentifiers": {
-                    "type": "string",
-                    "default": "haml,erb,slim,ruby",
-                    "description": "comma-separated list of language identifiers to scan for translation calls in. Valid identifiers can be found here: https://vscode-ppe.azurewebsites.net/docs/languages/identifiers"
+                    "type": "array",
+                    "description": "A list of language identifiers to scan for translation calls in. Valid identifiers can be found here: https://vscode-ppe.azurewebsites.net/docs/languages/identifiers",
+                    "items": {
+                        "type": "string",
+                        "description": "A valid VSCode language identifier string"
+                    },
+                    "default": [
+                        "ruby",
+                        "erb",
+                        "haml",
+                        "slim"
+                    ]
                 }
             }
         }
