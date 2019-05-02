@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.2.0
+- languages where translation info is provided can be configured via settings
+
 ## 0.1.0 
 - updated depencies
 - support ruby files
