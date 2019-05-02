@@ -14,7 +14,8 @@ Rails I18n helper for Visual Studio Code
 
 ## Features
 
-- supported template languages: haml, erb and slim
+- default supported template languages: haml, erb and slim
+  - others can be configured by adding the language identifier to the `railsI18n.languageIdentifiers` setting
 - shows translation (in default locale) when hovering over i18n keys in view files
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/hover.gif)
