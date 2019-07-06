@@ -84,14 +84,20 @@ export class I18nDefinitionProvider implements DefinitionProvider {
                 }
             }
             let value = yamlPair.value;
-            logger.debug('current value:', value);
-            if (['PLAIN', 'QUOTE_DOUBLE', 'QUOTE_SINGLE'].indexOf(value.type) >= 0) {
+            logger.debug('current value:', value, 'typeof value', typeof value);
+
+            if (typeof value !== 'object') {
+                logger.debug('unknown value object (not an object)', { value });
+                return null;
+            }
+
+            if (['PLAIN', 'QUOTE_DOUBLE', 'QUOTE_SINGLE', 'BLOCK_FOLDED', 'BLOCK_LITERAL'].indexOf(value.type) >= 0) {
                 logger.debug('findKeyValueRangeInYamlDocument', { value });
                 return value.range;
             } else if (value.items) {
                 yamlPairs = value.items;
             } else {
-                logger.debug('unknown value object (complex type with no child items)', { value });
+                logger.debug('unknown value object (complex type with no child items)', { ...value });
                 return null;
             }
         }
