@@ -2,7 +2,7 @@
     "name": "rails-i18n",
     "displayName": "Rails i18n",
     "description": "rails i18n helper",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "publisher": "shanehofstetter",
     "icon": "docs/icon.png",
     "repository": {
@@ -16,10 +16,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:haml",
-        "onLanguage:erb",
-        "onLanguage:slim",
-        "onLanguage:ruby"
+        "workspaceContains:config/locales/**/*.yml"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -54,6 +51,20 @@
                     ],
                     "default": false,
                     "description": "load all translation files configured in I18n.load_path"
+                },
+                "railsI18n.languageIdentifiers": {
+                    "type": "array",
+                    "description": "A list of language identifiers to scan for translation calls in. Valid identifiers can be found here: https://vscode-ppe.azurewebsites.net/docs/languages/identifiers",
+                    "items": {
+                        "type": "string",
+                        "description": "A valid VSCode language identifier string"
+                    },
+                    "default": [
+                        "ruby",
+                        "erb",
+                        "haml",
+                        "slim"
+                    ]
                 }
             }
         }
