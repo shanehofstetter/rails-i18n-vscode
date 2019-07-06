@@ -56,16 +56,20 @@ export class WorkspaceFolderTranslation {
             return null;
         }
 
-        let keyParts = this.makeKeyParts(key, locale);
-        let fullKey = keyParts.join(".");
+        const keyParts = this.makeKeyParts(key, locale);
+        const fullKey = keyParts.join(".");
 
-        let simpleLookupResult = this.lookupMap[fullKey];
-        if (typeof simpleLookupResult === "string") {
-            logger.debug('key:', key, 'fullKey:', fullKey, 'simpleLookupResult:', simpleLookupResult);
-            return simpleLookupResult;
-        }
+        const simpleLookupResult = this.lookupMap[fullKey];
+        logger.debug('key:', key, 'fullKey:', fullKey, 'simpleLookupResult:', simpleLookupResult, typeof simpleLookupResult);
 
-        let lookupResult = this.traverseTranslation(keyParts, this.translation);
+        if (['string', 'number', 'boolean'].indexOf(typeof simpleLookupResult) >= 0) return simpleLookupResult.toString();
+        if (simpleLookupResult === null) return "null"; // special case when null is defined as translation
+
+        // if simpleLookupResult returned undefined (not found) or some other unknown type, 
+        // this could mean that only a part of the key is given.
+        // try to find the resulting sub-tree and return that instead (converted to text).
+
+        const lookupResult = this.traverseTranslation(keyParts, this.translation);
         logger.debug('key:', key, 'fullKey:', fullKey, 'lookupResult:', lookupResult);
         if (lookupResult !== null && typeof lookupResult === "object") {
             return this.transformMultiResultIntoText(lookupResult);
