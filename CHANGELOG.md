@@ -1,5 +1,6 @@
 # Change Log
 
+## 0.3.0
 - improve i18n call detection regex (dashed keys)
 - support block types in yaml
 - support scalar types in yaml
