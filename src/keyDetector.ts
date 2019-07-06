@@ -20,7 +20,7 @@ export class KeyDetector {
      * @param document current document
      */
     public static getRangeOfI18nKeyAtPosition(position: Position, document: TextDocument): Range {
-        let i18nCallRegex = /(I18n\.)?t(ranslate)?[\(\s]+[\"\']{1}[\w+\.\/]+[\"\'\.]{1}\)?/g;
+        let i18nCallRegex = /(I18n\.)?t(ranslate)?[\(\s]+[\"\'][\w-\.\/]+[\"\'\.]\)?/g;
         return document.getWordRangeAtPosition(position, i18nCallRegex);
     }
 
