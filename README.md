@@ -5,28 +5,30 @@
 )](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
 [![](https://vsmarketplacebadge.apphb.com/installs-short/shanehofstetter.rails-i18n.svg
 )](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
+[![](https://vsmarketplacebadge.apphb.com/downloads-short/shanehofstetter.rails-i18n.svg
+)](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
 [![](https://vsmarketplacebadge.apphb.com/rating-short/shanehofstetter.rails-i18n.svg
 )](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
 [![](https://vsmarketplacebadge.apphb.com/trending-monthly/shanehofstetter.rails-i18n.svg
 )](https://marketplace.visualstudio.com/items?itemName=shanehofstetter.rails-i18n)
 
-Rails I18n helper for Visual Studio Code
+Rails i18n helper for Visual Studio Code
 
 ## Features
 
-- default supported template languages: haml, erb and slim
+- Default supported template languages: haml, erb and slim
   - others can be configured by adding the language identifier to the `railsI18n.languageIdentifiers` setting
-- shows translation (in default locale) when hovering over i18n keys in view files
+- Shows translation (in configured default locale) when hovering over i18n keys
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/hover.gif)
 
-- provides autocompletion when typing i18n keys in view files
+- Provides autocompletion when typing i18n keys
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/autocomplete.gif)
 
-- supports multiple workspace folders
-- evaluates and parses yaml files configured in `I18n.load_path` (turned off per default, turn it on by setting `railsI18n.loadAllTranslations` to `true`)
-- provides definition for i18n keys (Command '`Go To Definition`'  (<kbd>F12</kbd> or <kbd>⌘</kbd>+<kbd>↓</kbd>))
+- Supports multiple workspaces
+- Evaluates and parses yaml files configured in `I18n.load_path` (turned off per default, turn it on by setting `railsI18n.loadAllTranslations` to `true`)
+- Provides definition for i18n keys (Command '`Go To Definition`'  (<kbd>F12</kbd> or <kbd>⌘</kbd>+<kbd>↓</kbd>))
 
 ![alt text](https://github.com/shanehofstetter/rails-i18n-vscode/raw/master/docs/goto-definition.gif)
 
@@ -37,6 +39,6 @@ Rails I18n helper for Visual Studio Code
 ## Release Notes
 
 ## Planned Features
-- [ ] add a setting which when enabled shows translations in all available locales on hover
-- [ ] go-to-definition does create key in yaml file if it does not already exist 
+- [ ] add a setting and feature to show translations of all available locales on hover
+- [ ] go-to-definition creates key in yaml file if it does not already exist 
 - [ ] copy dot-separated translation keys into clipboard from yaml file
