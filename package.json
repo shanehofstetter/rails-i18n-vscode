@@ -2,7 +2,7 @@
     "name": "rails-i18n",
     "displayName": "Rails i18n",
     "description": "rails i18n helper",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "publisher": "shanehofstetter",
     "icon": "docs/icon.png",
     "repository": {
