@@ -124,8 +124,8 @@ export class WorkspaceFolderTranslation {
                     result = undefined;
                 }
             }
-            if (typeof result === 'string') {
-                break;
+            if (['string', 'number', 'boolean'].indexOf(typeof result) >= 0) {
+                return result.toString();
             }
         }
 
