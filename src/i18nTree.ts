@@ -1,6 +1,7 @@
 import { logger } from "./logger";
 import { Uri, WorkspaceFolder } from "vscode";
 import { WorkspaceFolderTranslation, TranslationPart } from "./workspaceFolderTranslation";
+import { YAMLDocument } from "./yamlDocument";
 
 export type Translation = { [key: string]: string | Translation }
 export type LookupMap = { [key: string]: string }
@@ -12,8 +13,8 @@ export class I18nTree {
         this.workspaceFolderTranslations = [];
     }
 
-    public mergeIntoI18nTree(i18nTreePart: Translation, workspaceFolder: WorkspaceFolder, sourceFile?: Uri) {
-        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, sourceFile);
+    public mergeIntoI18nTree(i18nTreePart: Translation, yamlDocument: YAMLDocument, workspaceFolder: WorkspaceFolder, sourceFile?: Uri) {
+        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, yamlDocument, sourceFile);
     }
 
     public getKeysStartingWith(keyPart: string, workspaceFolder: WorkspaceFolder): string[] {

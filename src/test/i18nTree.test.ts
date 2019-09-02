@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { I18nTree } from '../i18nTree';
 import { WorkspaceFolder, Uri } from 'vscode';
+import { YAMLDocument } from '../yamlDocument';
 
 describe("I18nTree", () => {
     const blogWorkspaceFolder: WorkspaceFolder = {
@@ -13,6 +14,11 @@ describe("I18nTree", () => {
         uri: Uri.file('/xy'),
         index: 1
     }
+    const yamlDocument: YAMLDocument = {
+        contents: { items: [] },
+        errors: [],
+        toJSON: function(arg?: any) {}
+    }
 
     beforeEach(() => {
         this.i18nTree = new I18nTree();
@@ -21,7 +27,7 @@ describe("I18nTree", () => {
     describe("init", () => {
         context("when translations loaded", () => {
             beforeEach(() => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
             });
 
             it("resets translations", () => {
@@ -42,12 +48,12 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('does not remove existing translations', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
             assert.equal(
                 this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                 'hi'
             );
-            this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, blogWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, yamlDocument, blogWorkspaceFolder)
             assert.equal(
                 this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder),
                 'hi'
@@ -60,11 +66,11 @@ describe("I18nTree", () => {
 
         context('when sourceFile is specified', () => {
             it('does not keep no longer existing keys', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder, Uri.file('/file/a'));
-                this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, blogWorkspaceFolder, Uri.file('/file/b'));
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder, Uri.file('/file/a'));
+                this.i18nTree.mergeIntoI18nTree({ en: { bye: 'bye' } }, yamlDocument, blogWorkspaceFolder, Uri.file('/file/b'));
                 assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), 'hi');
                 assert.equal(this.i18nTree.lookupKey('en.bye', blogWorkspaceFolder), 'bye');
-                this.i18nTree.mergeIntoI18nTree({ en: { ciao: 'ciao' } }, blogWorkspaceFolder, Uri.file('/file/a'));
+                this.i18nTree.mergeIntoI18nTree({ en: { ciao: 'ciao' } }, yamlDocument, blogWorkspaceFolder, Uri.file('/file/a'));
                 assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), undefined);
                 assert.equal(this.i18nTree.lookupKey('en.ciao', blogWorkspaceFolder), 'ciao');
             });
@@ -75,7 +81,7 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('returns keys which begin with substring', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi', help: 'help', bye: 'bye' } }, blogWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi', help: 'help', bye: 'bye' } }, yamlDocument, blogWorkspaceFolder)
             assert.deepStrictEqual(
                 this.i18nTree.getKeysStartingWith('en.he', blogWorkspaceFolder),
                 [
@@ -91,19 +97,19 @@ describe("I18nTree", () => {
 
         context('when translations exist', () => {
             it('returns true', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
                 assert.equal(this.i18nTree.translationsForLocaleExist('en', blogWorkspaceFolder), true);
             });
         });
 
         context('when no translations exist', () => {
             it('returns false if no translations for workspace folder available', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
                 assert.equal(this.i18nTree.translationsForLocaleExist('en', xyWorkspaceFolder), false);
             });
 
             it('returns false if no translations for workspace folder and locale available', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder)
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
                 assert.equal(this.i18nTree.translationsForLocaleExist('fr', blogWorkspaceFolder), false);
             });
         });
@@ -113,17 +119,17 @@ describe("I18nTree", () => {
         beforeEach(() => { this.i18nTree.init(); });
 
         it('returns first locale of workspacefolder translations', () => {
-            this.i18nTree.mergeIntoI18nTree({ fr: { hello: 'hi' }, it: { hello: 'hi' } }, blogWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({ fr: { hello: 'hi' }, it: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder)
             assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'fr');
         });
 
         it('returns en if no translations for workspace folder loaded', () => {
-            this.i18nTree.mergeIntoI18nTree({}, blogWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({}, yamlDocument, blogWorkspaceFolder)
             assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'en');
         });
 
         it('returns en if workspace folder not present in translations', () => {
-            this.i18nTree.mergeIntoI18nTree({}, xyWorkspaceFolder)
+            this.i18nTree.mergeIntoI18nTree({}, yamlDocument, xyWorkspaceFolder)
             assert.equal(this.i18nTree.getFallbackLocale(blogWorkspaceFolder), 'en');
         });
     });
@@ -133,13 +139,14 @@ describe("I18nTree", () => {
 
         context('with translations for workspace', () => {
             it('returns string translation', () => {
-                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+                this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder);
                 assert.equal(this.i18nTree.getTranslation('hello', 'en', blogWorkspaceFolder), 'hi');
             });
 
             it('returns multiresult', () => {
                 this.i18nTree.mergeIntoI18nTree(
                     { en: { greetings: { hi: 'hi', hello: 'hello' } } },
+                    yamlDocument,
                     blogWorkspaceFolder);
                 assert.equal(this.i18nTree.getTranslation('greetings', 'en', blogWorkspaceFolder),
                     'hi: hi\nhello: hello');
@@ -163,10 +170,10 @@ describe("I18nTree", () => {
 
     describe('getWorkspaceFolderNames', () => {
         it('returns list of workspace folder names', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder);
             assert.deepStrictEqual(this.i18nTree.getWorkspaceFolders(), [blogWorkspaceFolder]);
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, xyWorkspaceFolder);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, xyWorkspaceFolder);
             assert.deepStrictEqual(this.i18nTree.getWorkspaceFolders(), [blogWorkspaceFolder, xyWorkspaceFolder]);
         });
 
@@ -177,7 +184,7 @@ describe("I18nTree", () => {
 
     describe('lookupKey', () => {
         it('returns translation for given full key', () => {
-            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, blogWorkspaceFolder);
+            this.i18nTree.mergeIntoI18nTree({ en: { hello: 'hi' } }, yamlDocument, blogWorkspaceFolder);
             assert.equal(this.i18nTree.lookupKey('en.hello', blogWorkspaceFolder), 'hi');
         });
 

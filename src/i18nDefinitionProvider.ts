@@ -3,17 +3,8 @@ import { logger } from "./logger";
 import { KeyDetector } from "./keyDetector";
 import { i18nResolver } from "./extension";
 import { i18nTree } from "./i18nTree";
+import { YAMLDocument } from "./yamlDocument";
 import YAML from "yaml";
-
-interface YAMLDocument {
-    contents: { items: YAMLDocumentItem[] };
-}
-
-interface YAMLDocumentItem {
-    stringKey: string;
-    value: any;
-}
-
 export class I18nDefinitionProvider implements DefinitionProvider {
 
     provideDefinition(document: TextDocument, position: Position, token: CancellationToken): ProviderResult<Definition> {
@@ -35,28 +26,25 @@ export class I18nDefinitionProvider implements DefinitionProvider {
             return null;
         }
 
-        return this.findKeyValueLocationInDocument(translationPart.file, key, locale);
+        return this.findKeyValueLocationInDocument(translationPart.file, key, locale, translationPart.yamlDocument);
     }
 
-    findKeyValueLocationInDocument(file: Uri, absoluteKey: string, locale: string): Thenable<Location> {
+    findKeyValueLocationInDocument(file: Uri, absoluteKey: string, locale: string, yamlDocument?: YAMLDocument): Thenable<Location> {
         return workspace.openTextDocument(file.path).then((document: TextDocument) => {
-            const range: number[] = this.findKeyValueRangeInYAML(document.getText(), absoluteKey, locale);
+            if (!yamlDocument) {
+                try {
+                    yamlDocument = YAML.parseDocument(document.getText());
+                } catch (error) {
+                    logger.error('could not parse yaml document', { error })
+                    return null;
+                }
+            }
+            const range: number[] = this.findKeyValueRangeInYamlDocument(yamlDocument, absoluteKey, locale);
             if (!range) {
                 return null;
             }
             return new Location(file, new Range(document.positionAt(range[0]), document.positionAt(range[1])));
         });
-    }
-
-    findKeyValueRangeInYAML(yaml: string, absoluteKey: string, locale: string): number[] {
-        let yamlDocument: YAMLDocument = null;
-        try {
-            yamlDocument = YAML.parseDocument(yaml);
-        } catch (error) {
-            logger.error('could not parse yaml document', { error })
-            return null;
-        }
-        return this.findKeyValueRangeInYamlDocument(yamlDocument, absoluteKey, locale);
     }
 
     findKeyValueRangeInYamlDocument(yamlDocument: YAMLDocument, absoluteKey: string, locale: string): number[] {
