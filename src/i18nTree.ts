@@ -43,6 +43,10 @@ export class I18nTree {
         return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getTranslationPart(key, locale);
     }
 
+    public getFullKeyFromOffset(startOffset: number, file: Uri, workspaceFolder: WorkspaceFolder): string {
+        return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getFullKeyFromOffset(startOffset, file);
+    }
+
     public getWorkspaceFolders(): WorkspaceFolder[] {
         return this.workspaceFolderTranslations.map((workspaceFolderTranslation) => workspaceFolderTranslation.workspaceFolder);
     }

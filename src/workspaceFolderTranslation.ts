@@ -4,6 +4,7 @@ import { LookupMapGenerator } from "./lookupMapGenerator";
 import { logger } from "./logger";
 import * as merge from "merge";
 import { YAMLDocument } from "./yamlDocument";
+import { start } from "repl";
 
 export type TranslationPart = { file: Uri, translations: Translation, yamlDocument: YAMLDocument }
 
@@ -89,6 +90,15 @@ export class WorkspaceFolderTranslation {
             const result = this.traverseTranslation(this.makeKeyParts(key, locale), translationPart.translations);
             return typeof result === "string";
         });
+    }
+
+    public getFullKeyFromOffset(startOffset: number, file: Uri): string {
+        const translationPart = this.translationParts.find(tp => tp.file && tp.file.path === file.path);
+        if (!translationPart || !translationPart.yamlDocument) {
+            return null;
+        }
+
+        return translationPart.yamlDocument.getFullKeyFromOffset(startOffset);
     }
 
     public lookupKey(key: string): any {

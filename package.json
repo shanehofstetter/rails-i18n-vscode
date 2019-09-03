@@ -10,7 +10,7 @@
         "url": "https://github.com/shanehofstetter/rails-i18n-vscode"
     },
     "engines": {
-        "vscode": "^1.24.0"
+        "vscode": "^1.30.0"
     },
     "categories": [
         "Other"
@@ -20,7 +20,20 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [],
+        "commands": [
+            {
+                "command": "railsI18n.copyYamlKey",
+                "title": "Copy Key"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "railsI18n.copyYamlKey",
+                    "when": "resourceLangId == yaml"
+                }
+            ]
+        },
         "configuration": {
             "type": "object",
             "title": "Rails I18n",

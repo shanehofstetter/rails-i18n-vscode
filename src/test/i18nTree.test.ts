@@ -14,11 +14,7 @@ describe("I18nTree", () => {
         uri: Uri.file('/xy'),
         index: 1
     }
-    const yamlDocument: YAMLDocument = {
-        contents: { items: [] },
-        errors: [],
-        toJSON: function(arg?: any) {}
-    }
+    const yamlDocument: YAMLDocument = new YAMLDocument({})
 
     beforeEach(() => {
         this.i18nTree = new I18nTree();

@@ -1,12 +1,11 @@
-import YAML from "yaml";
 import * as vscode from 'vscode';
 import { workspace, Uri, window } from 'vscode';
 import { DefaultLocaleDetector, LocaleDefaults } from './defaultLocaleDetector';
 import { logger } from "./logger";
 import { RailsCommands } from "./railsCommands";
 import { i18nTree } from "./i18nTree";
-import { parseYAMLDocument } from "./yamlDocument";
 import { EventEmitter } from "events";
+import { YAMLDocument } from "./yamlDocument";
 
 export class I18nResolver implements vscode.Disposable {
 
@@ -90,8 +89,8 @@ export class I18nResolver implements vscode.Disposable {
                 if (!workspaceFolder) {
                     workspaceFolder = workspace.getWorkspaceFolder(file);
                 }
-                const yamlDocument = YAML.parseDocument(document.getText());
-                i18nTree.mergeIntoI18nTree(parseYAMLDocument(yamlDocument), yamlDocument, workspaceFolder, file);
+                const yamlDocument = YAMLDocument.parse(document.getText());
+                i18nTree.mergeIntoI18nTree(yamlDocument.toTranslation(), yamlDocument, workspaceFolder, file);
             } catch (error) {
                 logger.error('loadDocumentIntoMap', file.path, error.message);
             }
