@@ -8,6 +8,8 @@ export class I18nHoverProvider implements HoverProvider {
     public provideHover(document: TextDocument, position: Position, token: CancellationToken): Hover {
         let { key, range } = KeyDetector.getAbsoluteKeyFromPositionInDocument(position, document);
 
+        if (!key) return null;
+
         let i18nText = i18nResolver.getTranslationForKey(key);
         logger.debug('provideHover', { i18nText });
 
