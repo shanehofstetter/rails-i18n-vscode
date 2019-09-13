@@ -16,8 +16,11 @@ export class I18nResolver implements vscode.Disposable {
 
     public load(): Thenable<any> {
         this.init();
+        const start = new Date().getTime();
         return this.loadYamlFiles().then(_ => {
             logger.debug('yaml files loaded');
+            const end = new Date().getTime();
+            logger.debug('loading translations took ' + (end - start) + 'ms')
             this.registerFileWatcher();
             return this.loadDefaultLocale().then(() => {
                 logger.debug('finished loading.');
@@ -41,10 +44,10 @@ export class I18nResolver implements vscode.Disposable {
             return this.getYamlFilesForWorkspaceFolder(workspaceFolder).then(files => {
                 return Promise.all(files.map(file => {
                     logger.debug('loading locale file:', file.path);
-                    return this.loadYamlIntoTree(file, workspaceFolder);
+                    return this.loadYamlIntoTree(file, workspaceFolder, { fullRefresh: false, updateLookupMap: false });
                 }));
             })
-        }))
+        })).then(() => i18nTree.updateLookupMaps());
     }
 
     private getYamlFilesForWorkspaceFolder(workspaceFolder: vscode.WorkspaceFolder): Thenable<Uri[]> {
@@ -83,13 +86,14 @@ export class I18nResolver implements vscode.Disposable {
         });
     }
 
-    private loadYamlIntoTree(file: Uri, workspaceFolder?: vscode.WorkspaceFolder): Thenable<void> {
+    private loadYamlIntoTree(file: Uri, workspaceFolder?: vscode.WorkspaceFolder, options = {}): Thenable<void> {
         return workspace.openTextDocument(file.path).then((document: vscode.TextDocument) => {
             try {
                 if (!workspaceFolder) {
                     workspaceFolder = workspace.getWorkspaceFolder(file);
                 }
-                i18nTree.mergeIntoI18nTree(<Translation>YAML.parse(document.getText()), workspaceFolder, file);
+                logger.debug('mergeIntoI18nTree', file.path)
+                i18nTree.mergeIntoI18nTree(<Translation>YAML.parse(document.getText()), workspaceFolder, file, options);
             } catch (error) {
                 logger.error('loadDocumentIntoMap', file.path, error.message);
             }

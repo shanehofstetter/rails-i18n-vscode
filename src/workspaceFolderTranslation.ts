@@ -16,17 +16,36 @@ export class WorkspaceFolderTranslation {
         this.workspaceFolder = workspaceFolder;
     }
 
-    public mergeIntoI18nTree(i18nTreePart: Translation, sourceFile?: Uri) {
-        this.addTranslationPart(i18nTreePart, sourceFile || null);
-        this.translation = {};
-        this.translationParts.forEach((translationPart) => {
+    public mergeIntoI18nTree(i18nTreePart: Translation, sourceFile?: Uri, { fullRefresh = true, updateLookupMap = true } = {}) {
+        const translationPart = this.addTranslationPart(i18nTreePart, sourceFile || null);
+
+        if (fullRefresh) {
+            logger.debug('re-merging all translation-parts');
+            this.translation = {};
+            // re-merge all parts together
+            // if we'd only merge the updated translation, removed keys will remain
+            this.translationParts.forEach((translationPart) => {
+                this.translation = merge.recursive(
+                    true,
+                    this.translation,
+                    translationPart.translations
+                );
+            });
+        } else {
+            // only merge new translation part
             this.translation = merge.recursive(
                 true,
                 this.translation,
                 translationPart.translations
             );
-        });
+        }
+        if (updateLookupMap) {
+            this.updateLookupMap();
+        }
+    }
 
+    public updateLookupMap() {
+        logger.debug('updateLookupMap for', this.workspaceFolder.name);
         this.lookupMap = new LookupMapGenerator(this.translation).generateLookupMap();
     }
 
@@ -94,12 +113,13 @@ export class WorkspaceFolderTranslation {
         return this.lookupMap[key];
     }
 
-    private addTranslationPart(translation: Translation, sourceFile: Uri) {
+    private addTranslationPart(translation: Translation, sourceFile: Uri): TranslationPart {
         const translationPart = { translations: translation, file: sourceFile };
         if (this.translationParts.length > 0 && translationPart.file) {
             this.translationParts = this.translationParts.filter(tp => tp.file && tp.file.path !== translationPart.file.path);
         }
         this.translationParts.push(translationPart);
+        return translationPart;
     }
 
     private makeKeyParts(key: string, locale: string): string[] {
