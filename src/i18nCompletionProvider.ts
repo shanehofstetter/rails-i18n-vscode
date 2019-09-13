@@ -7,6 +7,8 @@ import { i18nTree } from './i18nTree';
 export class I18nCompletionProvider implements CompletionItemProvider {
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext): ProviderResult<CompletionItem[] | CompletionList> {
         const range = KeyDetector.getRangeOfI18nKeyAtPosition(position, document);
+        if (!range) return null;
+        
         const i18nKey = KeyDetector.getI18nKeyAtRangeFromDocument(range, document);
         let keyPrefix = i18nResolver.getDefaultLocaleKey(document.uri) + ".";
         logger.debug('provideCompletionItems', 'range:', range, 'i18nkey', i18nKey, 'keyPrefix', keyPrefix);
