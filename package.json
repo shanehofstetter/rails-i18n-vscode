@@ -23,7 +23,8 @@
         "commands": [
             {
                 "command": "railsI18n.copyYamlKey",
-                "title": "Copy Key"
+                "title": "Copy I18n Key",
+                "enablement": "resourceLangId == yaml"
             }
         ],
         "menus": {
