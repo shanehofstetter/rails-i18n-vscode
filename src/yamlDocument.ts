@@ -85,7 +85,7 @@ export class YAMLDocument {
         let keyParts = [];
 
         this.findRemainingKeyParts(this.parsedDocument.contents, startOffset, true, keyParts);
-        return keyParts.join('.');
+        return keyParts.slice(1).join('.'); // remove first key part, i.e. the locale
     }
 
     private findRemainingKeyParts(node: any, targetOffset: number, validateRange: boolean, keyParts: Array<string>): boolean {
