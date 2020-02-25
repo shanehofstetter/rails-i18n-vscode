@@ -4,7 +4,6 @@ import { LookupMapGenerator } from "./lookupMapGenerator";
 import { logger } from "./logger";
 import * as merge from "merge";
 import { YAMLDocument } from "./yamlDocument";
-import { start } from "repl";
 
 export type TranslationPart = { file: Uri, translations: Translation, yamlDocument: YAMLDocument }
 
@@ -127,7 +126,7 @@ export class WorkspaceFolderTranslation {
 
     private addTranslationPart(translation: Translation, yamlDocument: YAMLDocument, sourceFile: Uri): TranslationPart {
         const translationPart = { translations: translation, yamlDocument: yamlDocument, file: sourceFile };
-      
+
         if (this.translationParts.length > 0 && translationPart.file) {
             this.translationParts = this.translationParts.filter(tp => tp.file && tp.file.path !== translationPart.file.path);
         }
