@@ -91,27 +91,27 @@ describe("YAMLDocument", () => {
     });
 
     describe('getFullKeyFromOffset', () => {
-        it('returns only the first part of the key when first line is selected', () => {
-            assert.equal(YAMLDocument.parse(yaml).getFullKeyFromOffset(1), 'en');
+        it('returns empty string when first line is selected, does not include locale', () => {
+            assert.equal(YAMLDocument.parse(yaml).getFullKeyFromOffset(1), '');
         });
 
         it('returns multiple parts of key, up to and including selected key', () => {
-            assert.equal(YAMLDocument.parse(yaml).getFullKeyFromOffset(9), 'en.hello');
+            assert.equal(YAMLDocument.parse(yaml).getFullKeyFromOffset(9), 'hello');
         });
 
         context('with flat-key', () => {
             it('returns full flat key if only prefix portion is selected', () => {
-                assert.equal(YAMLDocument.parse(yamlAllFlatKeys).getFullKeyFromOffset(5), 'en.hello.world');
+                assert.equal(YAMLDocument.parse(yamlAllFlatKeys).getFullKeyFromOffset(5), 'hello.world');
             });
 
             it('returns the full flat key if final part is selected', () => {
-                assert.equal(YAMLDocument.parse(yamlAllFlatKeys).getFullKeyFromOffset(15), 'en.hello.world');
+                assert.equal(YAMLDocument.parse(yamlAllFlatKeys).getFullKeyFromOffset(15), 'hello.world');
             });
         });
 
         context('with multi-key file', () => {
             it('returns expected key', () => {
-                assert.equal(YAMLDocument.parse(multiKeyYaml).getFullKeyFromOffset(50), 'en.otherkey.morenesting');
+                assert.equal(YAMLDocument.parse(multiKeyYaml).getFullKeyFromOffset(50), 'otherkey.morenesting');
             });
         });
     });

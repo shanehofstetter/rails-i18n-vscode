@@ -106,7 +106,7 @@ export class YAMLDocument {
             }
         }
         else if (this.isScalarNode(node) && node.value) {
-            keyParts.push(node.value);
+            keyParts.push(...node.value.split('.'));
             match = true;
         }
         else if (node.items) {
