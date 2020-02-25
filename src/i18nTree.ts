@@ -13,8 +13,12 @@ export class I18nTree {
         this.workspaceFolderTranslations = [];
     }
 
-    public mergeIntoI18nTree(i18nTreePart: Translation, yamlDocument: YAMLDocument, workspaceFolder: WorkspaceFolder, sourceFile?: Uri) {
-        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, yamlDocument, sourceFile);
+    public mergeIntoI18nTree(i18nTreePart: Translation, yamlDocument: YAMLDocument, workspaceFolder: WorkspaceFolder, sourceFile?: Uri, options = {}) {
+        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, yamlDocument, sourceFile, options);
+    }
+
+    public updateLookupMaps() {
+        this.workspaceFolderTranslations.forEach(translation => translation.updateLookupMap());
     }
 
     public getKeysStartingWith(keyPart: string, workspaceFolder: WorkspaceFolder): string[] {

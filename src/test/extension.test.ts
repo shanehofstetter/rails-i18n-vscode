@@ -21,7 +21,7 @@ const workspaceFolder: WorkspaceFolder = {
     index: 0
 }
 
-describe("Extension", () => {
+describe.skip("Extension", () => {
     beforeEach(() => {
         fs.copySync(fixturePath, __dirname);
         workspace.updateWorkspaceFolders(0, 0, workspaceFolder);
