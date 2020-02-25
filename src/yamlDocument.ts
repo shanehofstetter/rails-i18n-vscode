@@ -118,7 +118,6 @@ export class YAMLDocument {
             }
         }
 
-        console.log("match", match, keyParts);
         return match;
     }
 
