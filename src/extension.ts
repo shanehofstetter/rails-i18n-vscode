@@ -6,6 +6,7 @@ import { I18nResolver } from './i18nResolver';
 import { I18nCompletionProvider } from './i18nCompletionProvider';
 import { workspace } from 'vscode';
 import { I18nDefinitionProvider } from './i18nDefinitionProvider';
+import { copyYamlKey } from './commands';
 
 export let i18nResolver = new I18nResolver();
 
@@ -29,4 +30,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     const triggerCharacters = ".abcdefghijklmnopqrstuvwxyz".split("");
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(documentFilters, new I18nCompletionProvider(), ...triggerCharacters));
+
+    context.subscriptions.push(vscode.commands.registerCommand('railsI18n.copyYamlKey', copyYamlKey));
 }

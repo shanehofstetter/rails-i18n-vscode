@@ -34,7 +34,8 @@ describe.skip("Extension", () => {
             globalState: null,
             extensionPath: '',
             asAbsolutePath: null,
-            storagePath: null
+            storagePath: null,
+            logPath: ''
         }
 
         beforeEach(() => {

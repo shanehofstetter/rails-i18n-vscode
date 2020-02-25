@@ -1,6 +1,7 @@
 import { logger } from "./logger";
 import { Uri, WorkspaceFolder } from "vscode";
 import { WorkspaceFolderTranslation, TranslationPart } from "./workspaceFolderTranslation";
+import { YAMLDocument } from "./yamlDocument";
 
 export type Translation = { [key: string]: string | Translation }
 export type LookupMap = { [key: string]: string }
@@ -12,8 +13,8 @@ export class I18nTree {
         this.workspaceFolderTranslations = [];
     }
 
-    public mergeIntoI18nTree(i18nTreePart: Translation, workspaceFolder: WorkspaceFolder, sourceFile?: Uri, options = {}) {
-        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, sourceFile, options);
+    public mergeIntoI18nTree(i18nTreePart: Translation, yamlDocument: YAMLDocument, workspaceFolder: WorkspaceFolder, sourceFile?: Uri, options = {}) {
+        this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).mergeIntoI18nTree(i18nTreePart, yamlDocument, sourceFile, options);
     }
 
     public updateLookupMaps() {
@@ -44,6 +45,10 @@ export class I18nTree {
     public getTranslationPart(key: string, locale: string, workspaceFolder: WorkspaceFolder): TranslationPart {
         logger.debug('getTranslationPart', 'key', key, 'locale', locale, 'workspaceFolder', workspaceFolder);
         return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getTranslationPart(key, locale);
+    }
+
+    public getFullKeyFromOffset(startOffset: number, file: Uri, workspaceFolder: WorkspaceFolder): string {
+        return this.getOrCreateWorkspaceFolderTranslation(workspaceFolder).getFullKeyFromOffset(startOffset, file);
     }
 
     public getWorkspaceFolders(): WorkspaceFolder[] {

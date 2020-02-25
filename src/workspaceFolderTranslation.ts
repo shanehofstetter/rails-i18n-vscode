@@ -3,8 +3,9 @@ import { Translation, LookupMap } from "./i18nTree";
 import { LookupMapGenerator } from "./lookupMapGenerator";
 import { logger } from "./logger";
 import * as merge from "merge";
+import { YAMLDocument } from "./yamlDocument";
 
-export type TranslationPart = { file: Uri, translations: Translation }
+export type TranslationPart = { file: Uri, translations: Translation, yamlDocument: YAMLDocument }
 
 export class WorkspaceFolderTranslation {
     public workspaceFolder: WorkspaceFolder;
@@ -16,8 +17,8 @@ export class WorkspaceFolderTranslation {
         this.workspaceFolder = workspaceFolder;
     }
 
-    public mergeIntoI18nTree(i18nTreePart: Translation, sourceFile?: Uri, { fullRefresh = true, updateLookupMap = true } = {}) {
-        const translationPart = this.addTranslationPart(i18nTreePart, sourceFile || null);
+    public mergeIntoI18nTree(i18nTreePart: Translation, yamlDocument: YAMLDocument, sourceFile?: Uri, { fullRefresh = true, updateLookupMap = true } = {}) {
+        const translationPart = this.addTranslationPart(i18nTreePart, yamlDocument, sourceFile || null);
 
         if (fullRefresh) {
             logger.debug('re-merging all translation-parts');
@@ -84,7 +85,7 @@ export class WorkspaceFolderTranslation {
         if (['string', 'number', 'boolean'].indexOf(typeof simpleLookupResult) >= 0) return simpleLookupResult.toString();
         if (simpleLookupResult === null) return "null"; // special case when null is defined as translation
 
-        // if simpleLookupResult returned undefined (not found) or some other unknown type, 
+        // if simpleLookupResult returned undefined (not found) or some other unknown type,
         // this could mean that only a part of the key is given.
         // try to find the resulting sub-tree and return that instead (converted to text).
 
@@ -98,7 +99,7 @@ export class WorkspaceFolderTranslation {
     }
 
     /**
-     * find the translation part containing given key (first match is returned) 
+     * find the translation part containing given key (first match is returned)
      * @param key i18n key
      * @param locale locale key
      */
@@ -109,12 +110,23 @@ export class WorkspaceFolderTranslation {
         });
     }
 
+    public getFullKeyFromOffset(startOffset: number, file: Uri): string {
+        const translationPart = this.translationParts.find(tp => tp.file && tp.file.path === file.path);
+        if (!translationPart || !translationPart.yamlDocument) {
+            return null;
+        }
+
+        return translationPart.yamlDocument.getFullKeyFromOffset(startOffset);
+    }
+
     public lookupKey(key: string): any {
         return this.lookupMap[key];
     }
 
-    private addTranslationPart(translation: Translation, sourceFile: Uri): TranslationPart {
-        const translationPart = { translations: translation, file: sourceFile };
+
+    private addTranslationPart(translation: Translation, yamlDocument: YAMLDocument, sourceFile: Uri): TranslationPart {
+        const translationPart = { translations: translation, yamlDocument: yamlDocument, file: sourceFile };
+
         if (this.translationParts.length > 0 && translationPart.file) {
             this.translationParts = this.translationParts.filter(tp => tp.file && tp.file.path !== translationPart.file.path);
         }
@@ -153,8 +165,8 @@ export class WorkspaceFolderTranslation {
     }
 
     private transformMultiResultIntoText(result: object): string {
-        // if last part of i18n key is missing (e.g. because its interpolated), 
-        // we can still show a list of possible translations 
+        // if last part of i18n key is missing (e.g. because its interpolated),
+        // we can still show a list of possible translations
         let resultLines = [];
         Object.keys(result).forEach(key => {
             let text = result[key];
