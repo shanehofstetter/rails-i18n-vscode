@@ -1,5 +1,7 @@
 # Change Log
 
+- add command to copy full i18n key on current cursor in yaml file
+
 ## 0.3.0
 - improve i18n call detection regex (dashed keys)
 - support block types in yaml
