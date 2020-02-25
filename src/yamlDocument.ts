@@ -98,9 +98,14 @@ export class YAMLDocument {
         let match = false;
         if (this.isPairNode(node)) {
             this.findRemainingKeyParts(node.key, targetOffset, false, keyParts);
-            match = match || this.findRemainingKeyParts(node.value, targetOffset, true, keyParts);
+            if (this.isScalarNode(node.value)) {
+                // stop if value is a scalar, i.e. the translation text
+                match = true;
+            } else {
+                match = match || this.findRemainingKeyParts(node.value, targetOffset, true, keyParts);
+            }
         }
-        else if (SCALAR_TYPES.indexOf(node.type) >= 0 && node.value) {
+        else if (this.isScalarNode(node) && node.value) {
             keyParts.push(node.value);
             match = true;
         }
@@ -113,6 +118,7 @@ export class YAMLDocument {
             }
         }
 
+        console.log("match", match, keyParts);
         return match;
     }
 
@@ -133,6 +139,10 @@ export class YAMLDocument {
 
     private isPairNode(node: any) {
         return PAIR_TYPES.indexOf(node.type) >= 0;
+    }
+
+    private isScalarNode(node: any) {
+        return SCALAR_TYPES.indexOf(node.type) >= 0;
     }
 
     private rangeCovers(range: any, value: number) {
