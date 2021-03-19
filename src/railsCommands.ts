@@ -1,6 +1,8 @@
-import { WorkspaceFolder, workspace } from "vscode";
+import { WorkspaceFolder, workspace, TextDocument } from "vscode";
 import * as execa from "execa";
 import { logger } from "./logger";
+
+const defReg = /def\s+(\w+)/g;
 
 export class RailsCommands {
     public static getDefaultLocale(workspaceFolder: WorkspaceFolder): Promise<string> {
@@ -20,6 +22,21 @@ export class RailsCommands {
             logger.debug('translation files: ', translationFiles);
             return Promise.resolve(translationFiles);
         });
+    }
+
+    // Stolen from: https://github.com/jemmyw/vscode-rails-fast-nav/blob/master/src/ruby-methods.ts
+    public static getMethodName(
+        document: TextDocument,
+        line: number
+    ): string | null {
+        for (let i = line; i >= 0; i--) {
+            const line = document.lineAt(i);
+            const matches = defReg.exec(line.text);
+        
+            if (matches) {
+                return matches[1];
+            }
+        }
     }
 
     private static getRailsCommand(): string[] {

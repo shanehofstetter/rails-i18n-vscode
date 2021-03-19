@@ -1,5 +1,6 @@
 import { Position, Range, TextDocument } from 'vscode';
 import { logger } from './logger';
+import { RailsCommands } from './railsCommands';
 
 /**
  * Provides functions to detect and transform i18n keys
@@ -38,24 +39,45 @@ export class KeyDetector {
      * @param key key to make absolute (a relative key begins with a period)
      * @param currentFilename current file name / path
      */
-    public static makeAbsoluteKey(key: string, currentFilename: string): string {
+    public static makeAbsoluteKey(key: string, document: TextDocument, position: Position): string {
         if (!this.isRelativeKey(key)) {
             return key;
         }
-        let relativeKeyPart = this.getRelativeKeyPart(currentFilename);
+        let relativeKeyPart = this.getRelativeKeyPart(document, position);
         if (!relativeKeyPart) {
             return key;
         }
         return relativeKeyPart + key;
     }
 
-    public static getRelativeKeyPart(currentFilename: string): string {
+    public static getStaticPart(document: TextDocument, line: number): string {
+        const fileName = document.fileName
+        const projectPath = fileName.split("app/")[1] // Gets the path after 'app/': 'views/products/index.html.rb'
+        const pathAndAction = projectPath.split(".")[0] // Gets the path and action part: 'views/products/index'
+        const staticPart = pathAndAction.replace(/\\|\//g, ".") // Replace the forward (or backward) slashes: 'views.products.index'
+        const parts = staticPart.split(".") // Split into parts: ['views', 'products', 'index']
+        const type = parts[0]
+        
+        // If translation is in a controller, get the action name and add it to the list of parts
+        // ['controllers', 'products_controller', 'index']
+        if (type === "controllers") {
+            const methodName = RailsCommands.getMethodName(document, line)
+            parts.push(methodName)
+        }
+        
+        const resource = parts.slice(1).join(".") // Remove first element and join: 'products.index'
+
+        return resource
+    }
+
+    public static getRelativeKeyPart(document: TextDocument, position: Position): string {
         try {
-            // get the relative key from current file path, starting at directory "views"
-            let relativeKey = currentFilename.split("views")[1].split(".")[0].replace(/\\|\//g, ".");
+            // get the relative key from current file path
+            let relativeKey = KeyDetector.getStaticPart(document, position.line);
             if (relativeKey.startsWith(".")) {
                 relativeKey = relativeKey.substring(1);
             }
+
             let relativeKeyParts = relativeKey.split(".");
             relativeKeyParts = relativeKeyParts.map(keyPart => {
                 if (keyPart.startsWith("_")) {
@@ -84,6 +106,6 @@ export class KeyDetector {
             return null;
         }
 
-        return { key: KeyDetector.makeAbsoluteKey(i18nKey, document.fileName), range };
+        return { key: KeyDetector.makeAbsoluteKey(i18nKey, document, position), range };
     }
 }
