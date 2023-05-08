@@ -14,7 +14,7 @@ export class I18nCompletionProvider implements CompletionItemProvider {
         logger.debug('provideCompletionItems', 'range:', range, 'i18nkey', i18nKey, 'keyPrefix', keyPrefix);
 
         if (KeyDetector.isRelativeKey(i18nKey)) {
-            keyPrefix += KeyDetector.getRelativeKeyPart(document.fileName);
+            keyPrefix += KeyDetector.getRelativeKeyPart(document, position);
         }
 
         return this.buildCompletionItemList(keyPrefix, i18nKey, workspace.getWorkspaceFolder(document.uri));
